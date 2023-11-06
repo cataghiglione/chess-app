@@ -1,7 +1,14 @@
 package edu.austral.dissis.common.entities
 
+import edu.austral.dissis.common.gameResults.GameOverGameResult
+import edu.austral.dissis.common.gameResults.InvalidGameResult
+import edu.austral.dissis.common.gameResults.ValidGameResult
 import edu.austral.dissis.common.interfaces.CheckMateValidatorInterface
+import edu.austral.dissis.common.interfaces.GameResult
+import edu.austral.dissis.common.interfaces.MovementResult
 import edu.austral.dissis.common.interfaces.Validator
+import edu.austral.dissis.common.movementResults.InvalidMovementResult
+import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 
 class Game(
@@ -14,35 +21,52 @@ class Game(
 ) {
     private val gameValidators: List<Validator> = moveValidators
 
-    fun move(from : Coordinate, to: Coordinate): Game {
+    fun move(from : Coordinate, to: Coordinate): GameResult {
         val movement = Movement(from, to)
-        if (validateMovement(movement)){
-            val newBoard = this.board.move(movement)
-            val auxMovements :List<Board> = movements.toList()
-            val newBoards :List<Board> = auxMovements + board
-
-            return Game(newBoard,newBoards,this.gameValidators,this.rules, oppositePlayer(), this.checkMateValidators)
-        }
-        throw Exception("Invalid move")
-    }
-    fun validateMovement(movement: Movement):Boolean{
-        return validateGameValidators(movement) && validatePieceRule(movement)
-    }
-    fun validateGameValidators(movement: Movement):Boolean{
-        for (validator in gameValidators){
-            if (!validator.validateMovement(movement, this)){
-                return false
+        when(val movementResult = validateMovement(movement)){
+            is InvalidMovementResult->{
+                return InvalidGameResult(movementResult.getMessage())
+            }
+            else->{
+                val newBoards = movements.toList() + board
+                val newGame = Game(
+                    board.move(movement),
+                    newBoards,
+                    gameValidators,
+                    rules,
+                    currentPlayer = oppositePlayer(),
+                    checkMateValidators
+                )
+                if (newGame.checkIfCheckMate()){
+                    return GameOverGameResult()
+                }
+                return ValidGameResult(newGame)
             }
         }
-        return true
+
     }
-    fun validatePieceRule(movement: Movement):Boolean{
+    fun validateMovement(movement: Movement):MovementResult{
+        val gameValidatorResult = validateGameValidators(movement)
+        val pieceValidatorResult = validatePieceRule(movement)
+        return when {
+            gameValidatorResult is InvalidMovementResult -> gameValidatorResult
+            pieceValidatorResult is InvalidMovementResult -> pieceValidatorResult
+            else -> ValidMovementResult()
+        }
+    }
+    fun validateGameValidators(movement: Movement):MovementResult{
+        for (validator in gameValidators){
+            if (validator.validateMovement(movement, this) !is ValidMovementResult){
+                return validator.validateMovement(movement, this)
+            }
+        }
+        return ValidMovementResult()
+    }
+    fun validatePieceRule(movement: Movement):MovementResult{
         val piece = this.board.getSquareContent(movement.getFrom())
         val pieceRule = rules[piece]
-        if (pieceRule!=null){
-            return pieceRule.validateMovement(movement, this)
-        }
-        return false
+        return pieceRule?.validateMovement(movement,this)!!
+
     }
     fun getBoard(): Board {
         return board

@@ -6,6 +6,7 @@ import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.chess.entities.ChessPieceName
 import edu.austral.dissis.common.entities.Piece
 import edu.austral.dissis.common.interfaces.CheckMateValidatorInterface
+import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 
 class CheckCheckMate : CheckMateValidatorInterface {
@@ -21,7 +22,7 @@ class CheckCheckMate : CheckMateValidatorInterface {
                     for (i in 1 until game.getBoard().getXDimension()) {
                         for (j in 1 until game.getBoard().getYDimension()) {
                             val possibleMovement = Movement(invertedBoard[piece]!!, Coordinate(i, j))
-                            if (game.validateMovement(possibleMovement)) {
+                            if (game.validateMovement(possibleMovement) is ValidMovementResult) {
                                 return false
                             }
                         }

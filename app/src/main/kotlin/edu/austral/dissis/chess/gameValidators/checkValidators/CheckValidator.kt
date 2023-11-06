@@ -6,7 +6,11 @@ import edu.austral.dissis.common.entities.Coordinate
 import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.chess.entities.ChessPieceName
+import edu.austral.dissis.chess.results.CheckMovementResult
 import edu.austral.dissis.common.entities.Piece
+import edu.austral.dissis.common.interfaces.MovementResult
+import edu.austral.dissis.common.movementResults.InvalidMovementResult
+import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 class CheckValidator : Validator {
 
@@ -22,10 +26,10 @@ class CheckValidator : Validator {
         return null
     }
 
-    override fun validateMovement(movement: Movement, game: Game): Boolean {
+    override fun validateMovement(movement: Movement, game: Game): MovementResult {
         val newBoard = game.getBoard().move(movement)
         val invertedBoard = newBoard.getInvertedBoard()
-        val kingPosition = getKingPosition(movement, game) ?: return false
+        val kingPosition = getKingPosition(movement, game) ?: return InvalidMovementResult()
         val enemyPieces = getEnemyPieces(invertedBoard, game)
         val newMoves = newMoves(game, newBoard)
         val newGameState = Game(
@@ -36,14 +40,12 @@ class CheckValidator : Validator {
             game.oppositePlayer(),
             game.getCheckMateValidators()
         )
-
         for (piece in enemyPieces) {
-            if (newGameState.validateMovement(Movement(invertedBoard[piece]!!, kingPosition))) {
-                return false
-//              throw Exception("You are in check")
+            if (newGameState.validateMovement(Movement(invertedBoard[piece]!!, kingPosition)) is ValidMovementResult) {
+                return InvalidMovementResult()
             }
         }
-        return true
+        return ValidMovementResult()
     }
 
 

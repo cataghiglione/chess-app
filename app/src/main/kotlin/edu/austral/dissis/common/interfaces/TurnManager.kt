@@ -4,5 +4,6 @@ import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
 
 interface TurnManager {
-    fun manageTurn(game: Game, movement: Movement)
+    fun validateMovement(game: Game, movement: Movement)
+    fun returnTurnManager():TurnManager
 }

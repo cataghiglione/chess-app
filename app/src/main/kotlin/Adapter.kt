@@ -11,6 +11,10 @@ import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.chess.entities.ChessPieceName
 import edu.austral.dissis.chess.quantityValidators.FirstMovementValidator
 import edu.austral.dissis.common.entities.Piece
+import edu.austral.dissis.common.gameResults.GameOverGameResult
+import edu.austral.dissis.common.gameResults.InvalidGameResult
+import edu.austral.dissis.common.gameResults.ValidGameResult
+import edu.austral.dissis.common.movementResults.InvalidMovementResult
 import edu.austral.dissis.common.validators.*
 import gameValidators.checkValidators.CheckCheckMate
 import gameValidators.checkValidators.CheckValidator
@@ -18,33 +22,32 @@ import gameValidators.checkValidators.CheckValidator
 class Adapter : GameEngine {
     var game = createClassicChessGame()
     override fun applyMove(move: Move): MoveResult {
-        try {
-            val from = move.from
-            val to = move.to
-            val coordinateFrom = Coordinate(from.column, from.row)
-            val coordinateTo = Coordinate(to.column, to.row)
-            val newGame = game.move(coordinateFrom, coordinateTo)
-            if (newGame.checkIfCheckMate()) {
-                val color = newGame.oppositePlayer()
-                return if (color == PieceColor.WHITE) {
-                    GameOver(PlayerColor.WHITE)
-                } else {
-                    GameOver(PlayerColor.BLACK)
-                }
-            } else {
-                game = newGame
-                val playerColor = if (newGame.getCurrentPlayer() == PieceColor.WHITE) {
-                    PlayerColor.WHITE
-                } else {
-                    PlayerColor.BLACK
-                }
-                return NewGameState(uiPieces(newGame.getBoard()), playerColor)
+        val from = move.from
+        val to = move.to
+        val coordinateFrom = Coordinate(from.column, from.row)
+        val coordinateTo = Coordinate(to.column, to.row)
+        return when (val movementResult = game.move(coordinateFrom, coordinateTo)) {
+            is InvalidGameResult -> {
+                InvalidMove(movementResult.getMessage())
             }
-        } catch (e: Exception) {
-            return InvalidMove(e.message ?: "Invalid move")
+
+            is ValidGameResult -> {
+                game = movementResult.getGame()
+                NewGameState(uiPieces(game.getBoard()), getCurrentPlayerColor(game.getCurrentPlayer()))
+            }
+
+            is GameOverGameResult -> {
+                GameOver(getCurrentPlayerColor(game.getCurrentPlayer()))
+            }
+
+            else-> InvalidMove("Invalid movement")
         }
+    }
 
-
+    private fun getCurrentPlayerColor(color: PieceColor): PlayerColor {
+        if (PieceColor.WHITE == color) {
+            return PlayerColor.WHITE
+        } else return PlayerColor.BLACK
     }
 
     fun uiPieces(board: Board): List<ChessPiece> {
@@ -74,83 +77,101 @@ class Adapter : GameEngine {
     }
 
     fun pawnsRule(color: PieceColor): Validator {
-        val orValidator = OrValidator(listOf(
-            AndValidator(
+        val orValidator = OrValidator(
             listOf(
-                LimitedQuantityMoveValidator(2),
-                VerticalObstacleMoveValidator(),
-                VerticalMovementMoveValidator(),
-                FirstMovementValidator(),
-                EmptySquareValidator(),
-                if (color==PieceColor.WHITE){
-                    OrientationValidator(true)
-                }
-                else{
-                    OrientationValidator(false)
-                }
-            )),
-            AndValidator(listOf(
-                LimitedQuantityMoveValidator(1),
-                VerticalMovementMoveValidator(),
-                EmptySquareValidator(),
-                if (color==PieceColor.WHITE){
-                    OrientationValidator(true)
-                }
-                else{
-                    OrientationValidator(false)
-                }
-            )),
-            AndValidator(listOf(
-                LimitedQuantityMoveValidator(1),
-                DiagonalMovementMoveValidator(),
-                EnemyOnToValidator(),
-                if (color==PieceColor.WHITE){
-                    OrientationValidator(true)
-                }
-                else{
-                    OrientationValidator(false)
-                }
-            ))
-        ))
+                AndValidator(
+                    listOf(
+                        LimitedQuantityMoveValidator(2),
+                        VerticalObstacleMoveValidator(),
+                        VerticalMovementMoveValidator(),
+                        FirstMovementValidator(),
+                        EmptySquareValidator(),
+                        if (color == PieceColor.WHITE) {
+                            OrientationValidator(true)
+                        } else {
+                            OrientationValidator(false)
+                        }
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        LimitedQuantityMoveValidator(1),
+                        VerticalMovementMoveValidator(),
+                        EmptySquareValidator(),
+                        if (color == PieceColor.WHITE) {
+                            OrientationValidator(true)
+                        } else {
+                            OrientationValidator(false)
+                        }
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        LimitedQuantityMoveValidator(1),
+                        DiagonalMovementMoveValidator(),
+                        EnemyOnToValidator(),
+                        if (color == PieceColor.WHITE) {
+                            OrientationValidator(true)
+                        } else {
+                            OrientationValidator(false)
+                        }
+                    )
+                )
+            )
+        )
         return orValidator
 
     }
 
 
     fun queenRule(): Validator {
-        val orValidator = OrValidator(listOf(
-            AndValidator(listOf(
-                DiagonalMovementMoveValidator(),
-                DiagonalObstacleMoveValidator()
-            )),
-            AndValidator(listOf(
-                HorizontalObstacleMoveValidator(),
-                HorizontalMovementMoveValidator()
-            )),
-            AndValidator(listOf(
-                VerticalObstacleMoveValidator(),
-                VerticalMovementMoveValidator()
-            ))
+        val orValidator = OrValidator(
+            listOf(
+                AndValidator(
+                    listOf(
+                        DiagonalMovementMoveValidator(),
+                        DiagonalObstacleMoveValidator()
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        HorizontalObstacleMoveValidator(),
+                        HorizontalMovementMoveValidator()
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        VerticalObstacleMoveValidator(),
+                        VerticalMovementMoveValidator()
+                    )
+                )
 
-        ))
+            )
+        )
         return orValidator;
     }
 
     fun kingRule(): Validator {
         val orValidator = OrValidator(
             listOf(
-                AndValidator(listOf(
-                    LimitedQuantityMoveValidator(1),
-                    DiagonalMovementMoveValidator()
-                )),
-                AndValidator(listOf(
-                    LimitedQuantityMoveValidator(1),
-                    HorizontalMovementMoveValidator()
-                )),
-                AndValidator(listOf(
-                    LimitedQuantityMoveValidator(1),
-                    VerticalMovementMoveValidator()
-                ))
+                AndValidator(
+                    listOf(
+                        LimitedQuantityMoveValidator(1),
+                        DiagonalMovementMoveValidator()
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        LimitedQuantityMoveValidator(1),
+                        HorizontalMovementMoveValidator()
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        LimitedQuantityMoveValidator(1),
+                        VerticalMovementMoveValidator()
+                    )
+                )
             )
         )
         return orValidator
@@ -173,16 +194,21 @@ class Adapter : GameEngine {
     fun rookRule(): Validator {
         val orValidator = OrValidator(
             listOf(
-                AndValidator(listOf(
-                    HorizontalObstacleMoveValidator(),
-                    HorizontalMovementMoveValidator()
-                )),
-                AndValidator(listOf(
-                    VerticalObstacleMoveValidator(),
-                    VerticalMovementMoveValidator()
-                ))
+                AndValidator(
+                    listOf(
+                        HorizontalObstacleMoveValidator(),
+                        HorizontalMovementMoveValidator()
+                    )
+                ),
+                AndValidator(
+                    listOf(
+                        VerticalObstacleMoveValidator(),
+                        VerticalMovementMoveValidator()
+                    )
+                )
 
-        ))
+            )
+        )
         return orValidator
     }
 
