@@ -14,7 +14,7 @@ class OwnObstacleOnToMoveValidator : Validator {
         return if (!(toContent != null && toContent.getColor() == pieceColor)){
             ValidMovementResult()
         } else {
-            InvalidMovementResult()
+            InvalidMovementResult("Invalid movement")
         }
     }
 }

@@ -13,9 +13,9 @@ class EnemyOnToValidator : Validator {
         if (pieceInTo != null) {
             return if (pieceInTo.getColor() != game.getCurrentPlayer()) {
                 return ValidMovementResult()
-            } else InvalidMovementResult()
+            } else InvalidMovementResult("Invalid movement")
         }
-        return InvalidMovementResult()
+        return InvalidMovementResult("Invalid movement")
     }
 
 }

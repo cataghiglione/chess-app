@@ -24,13 +24,13 @@ class LimitedQuantityMoveValidator : Validator {
             if (xDistance <= quantity){
                 ValidMovementResult()
             } else {
-                InvalidMovementResult()
+                InvalidMovementResult("Invalid movement")
             }
         } else {
             if(xDistance + yDistance <= quantity){
                 ValidMovementResult()
             } else {
-                InvalidMovementResult()
+                InvalidMovementResult("Invalid movement")
             }
         }
     }

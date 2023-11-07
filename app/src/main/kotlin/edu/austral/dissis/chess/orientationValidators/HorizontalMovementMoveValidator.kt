@@ -19,7 +19,7 @@ class HorizontalMovementMoveValidator : Validator {
         return if (xDistance != 0 && yDistance == 0){
             ValidMovementResult()
         } else {
-            InvalidMovementResult()
+            InvalidMovementResult("Invalid movement")
         }
     }
 }

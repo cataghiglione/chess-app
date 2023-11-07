@@ -15,7 +15,7 @@ class LMovementValidator : Validator {
         return if((xDistance == 1 && yDistance == 2) || (xDistance == 2 && yDistance == 1)){
             ValidMovementResult()
         } else {
-            InvalidMovementResult()
+            InvalidMovementResult("Invalid movement")
         }
     }
 }

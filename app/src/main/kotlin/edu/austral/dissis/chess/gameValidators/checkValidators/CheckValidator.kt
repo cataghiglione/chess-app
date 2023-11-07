@@ -29,7 +29,7 @@ class CheckValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
         val newBoard = game.getBoard().move(movement)
         val invertedBoard = newBoard.getInvertedBoard()
-        val kingPosition = getKingPosition(movement, game) ?: return InvalidMovementResult()
+        val kingPosition = getKingPosition(movement, game) ?: return InvalidMovementResult("Invalid movement")
         val enemyPieces = getEnemyPieces(invertedBoard, game)
         val newMoves = newMoves(game, newBoard)
         val newGameState = Game(
@@ -38,11 +38,13 @@ class CheckValidator : Validator {
             removeCheckValidators(game.getValidators()),
             game.getRules(),
             game.oppositePlayer(),
-            game.getCheckMateValidators()
+            game.getCheckMateValidators(),
+            game.getMovementExecutioner(),
+            game.getTurnManager()
         )
         for (piece in enemyPieces) {
             if (newGameState.validateMovement(Movement(invertedBoard[piece]!!, kingPosition)) is ValidMovementResult) {
-                return InvalidMovementResult()
+                return InvalidMovementResult("You are in check")
             }
         }
         return ValidMovementResult()

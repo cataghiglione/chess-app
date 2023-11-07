@@ -11,7 +11,7 @@ class MakeAMoveMoveValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
         return if (movement.getFrom() != movement.getTo()) {
             ValidMovementResult()
-        } else InvalidMovementResult()
+        } else InvalidMovementResult("You must select two different board squares to make a move")
 
     }
 }

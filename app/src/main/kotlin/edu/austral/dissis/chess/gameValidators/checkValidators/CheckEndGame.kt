@@ -5,12 +5,12 @@ import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.chess.entities.ChessPieceName
 import edu.austral.dissis.common.entities.Piece
-import edu.austral.dissis.common.interfaces.CheckMateValidatorInterface
+import edu.austral.dissis.common.interfaces.endGameValidator
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 
-class CheckCheckMate : CheckMateValidatorInterface {
-    override fun validateCheckMate(game: Game): Boolean {
+class CheckEndGame : endGameValidator {
+    override fun validateEndGame(game: Game): Boolean {
         //el game que me pasan es con el nuevo move, o sea chequeo si el currentPlayer esta en jaque mate
         //o sea si primero movieron las blancas, yo ahora chequeo si las negras pueden moverse o si estan en jaque mate
         val invertedBoard = game.getBoard().getInvertedBoard();

@@ -15,13 +15,13 @@ class OrientationValidator(orientation: Boolean) : Validator {
             return if (movement.getTo().yCoordinate > movement.getFrom().yCoordinate){
                 ValidMovementResult()
             }
-            else return InvalidMovementResult()
+            else return InvalidMovementResult("Invalid movement")
         }
         else{
             return if (movement.getFrom().yCoordinate > movement.getTo().yCoordinate){
                 ValidMovementResult()
             }
-            else return InvalidMovementResult()
+            else return InvalidMovementResult("Invalid movement")
         }
     }
 }

@@ -16,13 +16,13 @@ class VerticalObstacleMoveValidator : Validator {
             if (from.yCoordinate > to.yCoordinate) {
                 for (i in (to.yCoordinate+1 until from.yCoordinate)) {
                     if (game.getBoard().getSquareContent(Coordinate(from.xCoordinate, i)) != null) {
-                        return InvalidMovementResult()
+                        return InvalidMovementResult("Invalid movement")
                     }
                 }
             } else {
                 for (i in (from.yCoordinate+1 until to.yCoordinate)) {
                     if (game.getBoard().getSquareContent(Coordinate(from.xCoordinate, i)) != null) {
-                        return InvalidMovementResult()
+                        return InvalidMovementResult("Invalid movement")
                     }
                 }
             }

@@ -18,6 +18,6 @@ class DiagonalMovementMoveValidator: Validator {
         val yDistance = abs(fromYCoordinate - toYCoordinate)
         return if ( xDistance == yDistance) {
             ValidMovementResult()
-        } else InvalidMovementResult()
+        } else InvalidMovementResult("Invalid movement")
     }
 }

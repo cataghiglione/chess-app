@@ -13,7 +13,7 @@ class TurnValidator : Validator {
         return if (pieceColor == game.getCurrentPlayer()){
             ValidMovementResult()
         } else {
-            InvalidMovementResult()
+            InvalidMovementResult("It is not that player's turn")
         }
     }
 }

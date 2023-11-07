@@ -14,7 +14,7 @@ class OrValidator (private val andValidators : List<Validator>):Validator {
                 return ValidMovementResult()
             }
         }
-        return InvalidMovementResult()
+        return InvalidMovementResult("Invalid movement")
     }
 
 }

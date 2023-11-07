@@ -7,10 +7,11 @@ import edu.austral.dissis.common.interfaces.Validator
 import edu.austral.dissis.common.movementResults.InvalidMovementResult
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 
-class EmptySquareValidator : Validator {
+class EmptySquareOnFromValidator: Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
-        return if (game.getBoard().getSquareContent(movement.getTo()) == null) {
-            ValidMovementResult()
-        } else InvalidMovementResult()
+        if (game.getBoard().getSquareContent(movement.getFrom())==null){
+            return InvalidMovementResult("Invalid movement")
+        }
+        return ValidMovementResult()
     }
 }

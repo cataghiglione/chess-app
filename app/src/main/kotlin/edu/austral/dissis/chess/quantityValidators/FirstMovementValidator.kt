@@ -15,7 +15,7 @@ class FirstMovementValidator: Validator {
                 if (board.getSquareContent(movement.getFrom()) != game.getBoard()
                         .getSquareContent(movement.getFrom())
                 ) {
-                    return InvalidMovementResult()
+                    return InvalidMovementResult("Invalid movement")
                 }
             }
         }

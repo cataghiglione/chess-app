@@ -5,6 +5,6 @@ import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
 
 interface SpecialMovement {
-    fun isSpecialMovement(movement: Movement):Boolean
-    fun getNewBoard(movement: Movement, game: Game):Board
+    fun isSpecialMovement(movement: Movement, game: Game):Boolean
+    fun getNewGame(movement: Movement, game: Game):Game
 }

@@ -12,7 +12,7 @@ class InsideBoardMoveValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
         return if ( movement.getTo().yCoordinate <= game.getBoard().getYDimension() && movement.getTo().xCoordinate <= game.getBoard().getXDimension()) {
             ValidMovementResult()
-        } else InvalidMovementResult()
+        } else InvalidMovementResult("Square out of bounds")
     }
 
 }

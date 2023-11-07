@@ -24,7 +24,7 @@ class DiagonalObstacleMoveValidator : Validator {
         for (i in start until end) {
             for (j in startY until endY) {
                 if ((game.getBoard().getSquareContent(Coordinate(i,j)) != null) && abs(i - movement.getTo().xCoordinate) == abs(j - movement.getTo().yCoordinate) ) {
-                    return InvalidMovementResult()
+                    return InvalidMovementResult("Invalid movement")
                 }
             }
         }

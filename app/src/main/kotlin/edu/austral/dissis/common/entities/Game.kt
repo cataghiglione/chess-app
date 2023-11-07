@@ -3,10 +3,7 @@ package edu.austral.dissis.common.entities
 import edu.austral.dissis.common.gameResults.GameOverGameResult
 import edu.austral.dissis.common.gameResults.InvalidGameResult
 import edu.austral.dissis.common.gameResults.ValidGameResult
-import edu.austral.dissis.common.interfaces.CheckMateValidatorInterface
-import edu.austral.dissis.common.interfaces.GameResult
-import edu.austral.dissis.common.interfaces.MovementResult
-import edu.austral.dissis.common.interfaces.Validator
+import edu.austral.dissis.common.interfaces.*
 import edu.austral.dissis.common.movementResults.InvalidMovementResult
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 
@@ -17,26 +14,23 @@ class Game(
     moveValidators: List<Validator>,
     private val rules: Map<Piece, Validator>,
     private var currentPlayer: PieceColor = PieceColor.WHITE,
-    private val checkMateValidators: List<CheckMateValidatorInterface>
+    private val checkMateValidators: List<endGameValidator>,
+    private val movementExecutioner: MovementExecutioner,
+    private val turnManager: TurnManager
 ) {
     private val gameValidators: List<Validator> = moveValidators
 
     fun move(from : Coordinate, to: Coordinate): GameResult {
+        if (board.getSquareContent(from) == null){
+            return InvalidGameResult("A piece must be selected")
+        }
         val movement = Movement(from, to)
         when(val movementResult = validateMovement(movement)){
             is InvalidMovementResult->{
                 return InvalidGameResult(movementResult.getMessage())
             }
             else->{
-                val newBoards = movements.toList() + board
-                val newGame = Game(
-                    board.move(movement),
-                    newBoards,
-                    gameValidators,
-                    rules,
-                    currentPlayer = oppositePlayer(),
-                    checkMateValidators
-                )
+                val newGame = movementExecutioner.getNewGame(movement,this)
                 if (newGame.checkIfCheckMate()){
                     return GameOverGameResult()
                 }
@@ -64,6 +58,9 @@ class Game(
     }
     fun validatePieceRule(movement: Movement):MovementResult{
         val piece = this.board.getSquareContent(movement.getFrom())
+        if (piece==null){
+
+        }
         val pieceRule = rules[piece]
         return pieceRule?.validateMovement(movement,this)!!
 
@@ -79,7 +76,7 @@ class Game(
     }
     public fun checkIfCheckMate():Boolean{
         for (checkMateValidator in checkMateValidators){
-            if (checkMateValidator.validateCheckMate(this)){
+            if (checkMateValidator.validateEndGame(this)){
                 return true
             }
         }
@@ -98,8 +95,14 @@ class Game(
     fun getRules(): Map<Piece, Validator>{
         return this.rules
     }
-    fun getCheckMateValidators(): List<CheckMateValidatorInterface>{
+    fun getCheckMateValidators(): List<endGameValidator>{
         return this.checkMateValidators
+    }
+    fun getMovementExecutioner():MovementExecutioner{
+        return this.movementExecutioner
+    }
+    fun getTurnManager():TurnManager{
+        return this.turnManager
     }
 
 }
