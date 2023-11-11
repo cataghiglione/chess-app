@@ -5,7 +5,7 @@ import edu.austral.dissis.common.entities.*
 import edu.austral.dissis.common.interfaces.SpecialMovement
 import edu.austral.dissis.common.interfaces.Validator
 
-class PawnPromotion : SpecialMovement {
+class ChessPawnPromotion : SpecialMovement {
     override fun isSpecialMovement(movement: Movement, game: Game): Boolean {
         val piece = game.getBoard().getSquareContent(movement.getFrom())
         if (piece != null) {
@@ -35,26 +35,22 @@ class PawnPromotion : SpecialMovement {
         val newRules = game.getRules().toMutableMap()
         newRules.remove(piece)
         newRules[newQueen] = queenValidator
-        val newBoard = game.getBoard().board.toMutableMap()
-        newBoard.remove(movement.getFrom())
-        newBoard[movement.getTo()] = newQueen
+        val newBoard = game.getBoard().replacePiece(movement, newQueen)
         val newBoards = game.getMovements().toList() + game.getBoard()
-        return Game(
-            Board(newBoard, game.getBoard().getXDimension(), game.getBoard().getYDimension()),
-            newBoards,
-            game.getValidators(),
-            newRules,
-            game.oppositePlayer(),
-            game.getCheckMateValidators(),
-            game.getMovementExecutioner(),game.getTurnManager()
-        )
+        return game.copy(board = newBoard,movements=newBoards,rules = newRules, currentPlayer = game.getTurnManager().getNewTurn(game,movement))
+//        return Game(
+//            Board(newBoard, game.getBoard().getXDimension(), game.getBoard().getYDimension()),
+//            newBoards,
+//            game.getValidators(),
+//            newRules,
+//            game.oppositePlayer(),
+//            game.getCheckMateValidators(),
+//            game.getMovementExecutioner(),game.getTurnManager()
+//        )
     }
 
     private fun getOrientation(piece: Piece): Boolean {
-        if (piece.getColor() == PieceColor.WHITE) {
-            return true
-        }
-        return false
+        return piece.getColor() == PieceColor.WHITE
     }
 
     private fun findQueenRules(game: Game): Validator? {

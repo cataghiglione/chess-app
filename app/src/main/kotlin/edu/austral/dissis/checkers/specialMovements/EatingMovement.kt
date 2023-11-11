@@ -32,42 +32,38 @@ class EatingMovement : SpecialMovement {
         val to = movement.getTo()
         val pieceToEatCoordinate =
             Coordinate((from.xCoordinate + to.xCoordinate) / 2, (from.yCoordinate + to.yCoordinate) / 2)
-        val auxBoard = game.getBoard().board.toMutableMap()
-        auxBoard.remove(pieceToEatCoordinate)
-        val piece = game.getBoard().getSquareContent(from)
-        auxBoard.remove(from)
-        auxBoard[to] = piece!!
-        val newBoard = Board(auxBoard, game.getBoard().getXDimension(), game.getBoard().getYDimension())
+        val removedPieceBoard = game.getBoard().removePiece(pieceToEatCoordinate)
+        val auxBoard = removedPieceBoard.move(movement)
         val newBoards = game.getMovements().toList() + game.getBoard()
         val newTurnManager = CheckersTurnManager(possiblePieceId)
-        if (possiblePieceId != -1) {
-            return Game(
-                newBoard,
-                newBoards,
-                game.getValidators(),
-                game.getRules(),
-                newTurnManager.getNewTurn(game, movement),
-                game.getCheckMateValidators(),
-                game.getMovementExecutioner(),
-                newTurnManager
-            )
-        } else return Game(
-            newBoard,
-            newBoards,
-            game.getValidators(),
-            game.getRules(),
-            newTurnManager.getNewTurn(game, movement),
-            game.getCheckMateValidators(),
-            game.getMovementExecutioner(),
-            newTurnManager
-        )
+        return  game.copy(board = auxBoard, movements = newBoards, currentPlayer = newTurnManager.getNewTurn(game, movement), turnManager = newTurnManager)
+//        return Game(
+//            auxBoard,
+//            newBoards,
+//            game.getValidators(),
+//            game.getRules(),
+//            newTurnManager.getNewTurn(game, movement),
+//            game.getCheckMateValidators(),
+//            game.getMovementExecutioner(),
+//            newTurnManager
+//        )
 
     }
 
     private fun checkIfCanEatAgain(movement: Movement, game: Game): Int {
         val to = movement.getTo()
         val newBoard = game.getBoard().move(movement)
-        val newGame = Game(newBoard, game.getMovements(), game.getValidators(), game.getRules(), game.getCurrentPlayer(), game.getCheckMateValidators(), game.getMovementExecutioner(), game.getTurnManager())
+        val newGame = game.copy(board = newBoard)
+//        val newGame = Game(
+//            newBoard,
+//            game.getMovements(),
+//            game.getValidators(),
+//            game.getRules(),
+//            game.getCurrentPlayer(),
+//            game.getCheckMateValidators(),
+//            game.getMovementExecutioner(),
+//            game.getTurnManager()
+//        )
         val array = intArrayOf(-2, 2)
         for (i in array) {
             for (j in array) {
@@ -82,17 +78,6 @@ class EatingMovement : SpecialMovement {
         return -1
     }
 
-    private fun validatePossibleMovement(movement: Movement, game: Game): MovementResult {
-        if (InsideBoardMoveValidator().validateMovement(movement, game) is ValidMovementResult) {
-            if (CanEatValidator().validateMovement(movement, game) is ValidMovementResult) {
-                return if (EmptySquareOnToValidator().validateMovement(movement, game) is ValidMovementResult) {
-                    ValidMovementResult()
-                } else InvalidMovementResult("You must eat a piece")
-            }
-            return InvalidMovementResult("You must eat a piece")
-        }
-        else return InvalidMovementResult("You must eat a piece")
 
-    }
 
 }

@@ -27,5 +27,18 @@ class Board(val board: Map<Coordinate?, Piece?>, private val xDimension: Int, pr
             }
             return invertedBoard
      }
+    fun replacePiece(movement: Movement, piece: Piece): Board {
+        val auxBoard: MutableMap<Coordinate?, Piece?> = HashMap(board)
+        auxBoard.remove(movement.getFrom())
+        auxBoard[movement.getTo()] = piece
+        val newBoard: HashMap<Coordinate?, Piece?> = HashMap(auxBoard)
+        return Board(newBoard, xDimension, yDimension)
+    }
+    fun removePiece(coordinate: Coordinate):Board{
+        val auxBoard: MutableMap<Coordinate?, Piece?> = HashMap(board)
+        auxBoard.remove(coordinate)
+        val newBoard: HashMap<Coordinate?, Piece?> = HashMap(auxBoard)
+        return Board(newBoard, xDimension, yDimension)
+    }
 }
 

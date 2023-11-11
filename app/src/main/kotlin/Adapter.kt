@@ -1,5 +1,8 @@
 import edu.austral.dissis.checkers.CheckersMovementExecutioner
 import edu.austral.dissis.checkers.CheckersTurnManager
+import edu.austral.dissis.checkers.endGameValidators.NoPiecesLeftValidator
+import edu.austral.dissis.checkers.endGameValidators.NoPossibleMovementsValidator
+import edu.austral.dissis.checkers.entities.CheckersPieceName
 import edu.austral.dissis.checkers.specialMovements.EatingMovement
 import edu.austral.dissis.checkers.validators.CanEatValidator
 import edu.austral.dissis.checkers.validators.MustEatPieceValidator
@@ -17,7 +20,7 @@ import edu.austral.dissis.common.entities.PieceColor
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.chess.entities.ChessPieceName
 import edu.austral.dissis.chess.quantityValidators.FirstMovementValidator
-import edu.austral.dissis.chess.specialMovements.PawnPromotion
+import edu.austral.dissis.chess.specialMovements.ChessPawnPromotion
 import edu.austral.dissis.common.entities.Piece
 import edu.austral.dissis.common.gameResults.GameOverGameResult
 import edu.austral.dissis.common.gameResults.InvalidGameResult
@@ -263,7 +266,7 @@ class Adapter : GameEngine {
         val gameMoveValidators: MutableList<Validator> = chessGameValidators(ArrayList<Validator>())
         val checkMateValidators = chessCheckMateValidators(ArrayList<endGameValidator>())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        val chessMovementExecutioner = ChessMovementExecutioner(listOf(PawnPromotion()))
+        val chessMovementExecutioner = ChessMovementExecutioner(listOf(ChessPawnPromotion()))
         pieceRules[Piece(ChessPieceName.KING, PieceColor.WHITE, 13)] = chessKingRule()
         pieceRules[Piece(ChessPieceName.KING, PieceColor.BLACK, 29)] = chessKingRule()
         pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)] = queenRule()
@@ -321,48 +324,48 @@ class Adapter : GameEngine {
     fun createClassicCheckersGame():Game{
         val gameBoard: MutableMap<Coordinate?, Piece?> = HashMap()
         val board: Board = Board(gameBoard, 8, 8)
-        val gameMoveValidators: MutableList<Validator> = checkersGameValidators(ArrayList<Validator>())
-        val checkMateValidators = chessCheckMateValidators(ArrayList<endGameValidator>())
+        val gameMoveValidators: MutableList<Validator> = checkersGameValidators(ArrayList())
+        val endGameValidators = checkersEndGameValidators(ArrayList())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
         val checkersExecutioner = CheckersMovementExecutioner(listOf(EatingMovement()))
         val checkersManager = CheckersTurnManager(-1)
         for (i in 1..12) {
-            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)] = checkersPawnsRule(PieceColor.WHITE)
+            pieceRules[Piece(CheckersPieceName.PAWN, PieceColor.WHITE, i)] = checkersPawnsRule(PieceColor.WHITE)
         }
         for (i in 13..24) {
-            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.BLACK, i)] = checkersPawnsRule(PieceColor.BLACK)
+            pieceRules[Piece(CheckersPieceName.PAWN, PieceColor.BLACK, i)] = checkersPawnsRule(PieceColor.BLACK)
         }
-        gameBoard[Coordinate(1,8)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,13)
-        gameBoard[Coordinate(3,8)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,14)
-        gameBoard[Coordinate(5,8)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,15)
-        gameBoard[Coordinate(7,8)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,16)
+        gameBoard[Coordinate(1,8)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,13)
+        gameBoard[Coordinate(3,8)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,14)
+        gameBoard[Coordinate(5,8)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,15)
+        gameBoard[Coordinate(7,8)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,16)
 
-        gameBoard[Coordinate(2,7)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,17)
-        gameBoard[Coordinate(4,7)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,18)
-        gameBoard[Coordinate(6,7)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,19)
-        gameBoard[Coordinate(8,7)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,20)
+        gameBoard[Coordinate(2,7)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,17)
+        gameBoard[Coordinate(4,7)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,18)
+        gameBoard[Coordinate(6,7)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,19)
+        gameBoard[Coordinate(8,7)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,20)
 
-        gameBoard[Coordinate(1,6)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,21)
-        gameBoard[Coordinate(3,6)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,22)
-        gameBoard[Coordinate(5,6)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,23)
-        gameBoard[Coordinate(7,6)]=Piece(ChessPieceName.PAWN,PieceColor.BLACK,24)
+        gameBoard[Coordinate(1,6)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,21)
+        gameBoard[Coordinate(3,6)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,22)
+        gameBoard[Coordinate(5,6)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,23)
+        gameBoard[Coordinate(7,6)]=Piece(CheckersPieceName.PAWN,PieceColor.BLACK,24)
 
-        gameBoard[Coordinate(2,1)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,1)
-        gameBoard[Coordinate(4,1)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,2)
-        gameBoard[Coordinate(6,1)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,3)
-        gameBoard[Coordinate(8,1)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,4)
+        gameBoard[Coordinate(2,1)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,1)
+        gameBoard[Coordinate(4,1)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,2)
+        gameBoard[Coordinate(6,1)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,3)
+        gameBoard[Coordinate(8,1)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,4)
 
-        gameBoard[Coordinate(1,2)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,5)
-        gameBoard[Coordinate(3,2)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,6)
-        gameBoard[Coordinate(5,2)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,7)
-        gameBoard[Coordinate(7,2)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,8)
+        gameBoard[Coordinate(1,2)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,5)
+        gameBoard[Coordinate(3,2)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,6)
+        gameBoard[Coordinate(5,2)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,7)
+        gameBoard[Coordinate(7,2)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,8)
 
-        gameBoard[Coordinate(2,3)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,9)
-        gameBoard[Coordinate(4,3)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,10)
-        gameBoard[Coordinate(6,3)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,11)
-        gameBoard[Coordinate(8,3)]=Piece(ChessPieceName.PAWN,PieceColor.WHITE,12)
+        gameBoard[Coordinate(2,3)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,9)
+        gameBoard[Coordinate(4,3)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,10)
+        gameBoard[Coordinate(6,3)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,11)
+        gameBoard[Coordinate(8,3)]=Piece(CheckersPieceName.PAWN,PieceColor.WHITE,12)
 
-        val game = Game(board, ArrayList<Board>(),gameMoveValidators,pieceRules,PieceColor.WHITE,checkMateValidators,checkersExecutioner,checkersManager)
+        val game = Game(board, ArrayList<Board>(),gameMoveValidators,pieceRules,PieceColor.WHITE,endGameValidators,checkersExecutioner,checkersManager)
         return game
     }
     fun checkersPawnsRule(color: PieceColor):Validator{
@@ -409,6 +412,13 @@ class Adapter : GameEngine {
         gameValidator.add(ownObstacleOnToMoveValidator)
         return gameValidator
 
+    }
+    fun checkersEndGameValidators(endGameValidators: ArrayList<endGameValidator>):ArrayList<endGameValidator>{
+        val noPossibleMovementsValidator = NoPossibleMovementsValidator()
+        val noPiecesLeftValidator = NoPiecesLeftValidator()
+        endGameValidators.add(noPiecesLeftValidator)
+        endGameValidators.add(noPossibleMovementsValidator)
+        return endGameValidators
     }
 
 

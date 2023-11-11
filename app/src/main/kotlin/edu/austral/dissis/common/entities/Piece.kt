@@ -1,11 +1,12 @@
 package edu.austral.dissis.common.entities
 
 import edu.austral.dissis.chess.entities.ChessPieceName
+import edu.austral.dissis.common.EnumName
 import java.util.*
 
-data class Piece(private val chessPieceName: ChessPieceName, private val color: PieceColor, private var id: Int =0){
+data class Piece(private val chessPieceName: EnumName, private val color: PieceColor, private var id: Int =0){
 
-     fun getName(): ChessPieceName {
+     fun getName(): EnumName {
          return chessPieceName
      }
      fun getColor(): PieceColor {

@@ -14,7 +14,7 @@ class Game(
     moveValidators: List<Validator>,
     private val rules: Map<Piece, Validator>,
     private var currentPlayer: PieceColor = PieceColor.WHITE,
-    private val checkMateValidators: List<endGameValidator>,
+    private val endGameValidators: List<endGameValidator>,
     private val movementExecutioner: MovementExecutioner,
     private val turnManager: TurnManager
 ) {
@@ -31,7 +31,7 @@ class Game(
             }
             else->{
                 val newGame = movementExecutioner.getNewGame(movement,this)
-                if (newGame.checkIfCheckMate()){
+                if (newGame.checkIfEndGame()){
                     return GameOverGameResult()
                 }
                 return ValidGameResult(newGame)
@@ -74,8 +74,8 @@ class Game(
         }
         return PieceColor.WHITE
     }
-    public fun checkIfCheckMate():Boolean{
-        for (checkMateValidator in checkMateValidators){
+    public fun checkIfEndGame():Boolean{
+        for (checkMateValidator in endGameValidators){
             if (checkMateValidator.validateEndGame(this)){
                 return true
             }
@@ -96,13 +96,16 @@ class Game(
         return this.rules
     }
     fun getCheckMateValidators(): List<endGameValidator>{
-        return this.checkMateValidators
+        return this.endGameValidators
     }
     fun getMovementExecutioner():MovementExecutioner{
         return this.movementExecutioner
     }
     fun getTurnManager():TurnManager{
         return this.turnManager
+    }
+    public fun copy(board: Board = this.board, movements: List<Board> = this.movements, moveValidators: List<Validator> = this.gameValidators, rules: Map<Piece, Validator> = this.rules, currentPlayer: PieceColor = this.currentPlayer, endGameValidators: List<endGameValidator> = this.endGameValidators, movementExecutioner: MovementExecutioner = this.movementExecutioner, turnManager: TurnManager = this.turnManager): Game {
+        return Game(board, movements, moveValidators, rules, currentPlayer, endGameValidators, movementExecutioner, turnManager)
     }
 
 }

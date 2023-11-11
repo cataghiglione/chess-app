@@ -13,7 +13,8 @@ class ChessMovementExecutioner(val specialMovements: List<SpecialMovement>) : Mo
             }
         }
         val newBoards = game.getMovements().toList() + game.getBoard()
-        return Game(game.getBoard().move(movement),newBoards,game.getValidators(),game.getRules(),game.getTurnManager().getNewTurn(game,movement),game
-            .getCheckMateValidators(),game.getMovementExecutioner(),game.getTurnManager() )
+        return game.copy(board = game.getBoard().move(movement),movements = newBoards, currentPlayer = game.getTurnManager().getNewTurn(game,movement))
+//        return Game(game.g etBoard().move(movement),newBoards,game.getValidators(),game.getRules(),game.getTurnManager().getNewTurn(game,movement),game
+//            .getCheckMateValidators(),game.getMovementExecutioner(),game.getTurnManager() )
     }
 }

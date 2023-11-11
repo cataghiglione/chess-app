@@ -5,7 +5,8 @@ import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.common.interfaces.MovementExecutioner
 import edu.austral.dissis.common.interfaces.SpecialMovement
 
-class CheckersMovementExecutioner(val specialMovements : List<SpecialMovement>): MovementExecutioner {
+class CheckersMovementExecutioner(private val specialMovements : List<SpecialMovement>): MovementExecutioner {
+
     override fun getNewGame(movement: Movement, game: Game): Game {
         for (specialMovement in specialMovements){
             if (specialMovement.isSpecialMovement(movement,game)){
@@ -13,8 +14,8 @@ class CheckersMovementExecutioner(val specialMovements : List<SpecialMovement>):
             }
         }
         val newBoards = game.getMovements().toList() + game.getBoard()
-        return Game(game.getBoard().move(movement),newBoards,game.getValidators(),game.getRules(),game.getTurnManager().getNewTurn(game,movement),game
-            .getCheckMateValidators(),game.getMovementExecutioner(),game.getTurnManager() )
-
+        return game.copy(board = game.getBoard().move(movement), movements = newBoards, currentPlayer = game.getTurnManager().getNewTurn(game,movement))
+//        return Game(game.getBoard().move(movement),newBoards,game.getValidators(),game.getRules(),game.getTurnManager().getNewTurn(game,movement),game
+//            .getCheckMateValidators(),game.getMovementExecutioner(),game.getTurnManager() )
     }
 }
