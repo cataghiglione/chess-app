@@ -32,7 +32,7 @@ class Game(
             else->{
                 val newGame = movementExecutioner.getNewGame(movement,this)
                 if (newGame.checkIfEndGame()){
-                    return GameOverGameResult()
+                    return GameOverGameResult(currentPlayer)
                 }
                 return ValidGameResult(newGame)
             }
@@ -104,7 +104,11 @@ class Game(
     fun getTurnManager():TurnManager{
         return this.turnManager
     }
-    public fun copy(board: Board = this.board, movements: List<Board> = this.movements, moveValidators: List<Validator> = this.gameValidators, rules: Map<Piece, Validator> = this.rules, currentPlayer: PieceColor = this.currentPlayer, endGameValidators: List<endGameValidator> = this.endGameValidators, movementExecutioner: MovementExecutioner = this.movementExecutioner, turnManager: TurnManager = this.turnManager): Game {
+    public fun copy(board: Board = this.board, movements: List<Board> = this.movements,
+                    moveValidators: List<Validator> = this.gameValidators, rules: Map<Piece,
+                Validator> = this.rules, currentPlayer: PieceColor = this.currentPlayer,
+                    endGameValidators: List<endGameValidator> = this.endGameValidators,
+                    movementExecutioner: MovementExecutioner = this.movementExecutioner, turnManager: TurnManager = this.turnManager): Game {
         return Game(board, movements, moveValidators, rules, currentPlayer, endGameValidators, movementExecutioner, turnManager)
     }
 

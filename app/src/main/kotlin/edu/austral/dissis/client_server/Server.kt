@@ -1,10 +1,7 @@
 package edu.austral.dissis.client_server
 
 import com.fasterxml.jackson.core.type.TypeReference
-import edu.austral.dissis.chess.gui.GameOver
-import edu.austral.dissis.chess.gui.InvalidMove
-import edu.austral.dissis.chess.gui.Move
-import edu.austral.dissis.chess.gui.NewGameState
+import edu.austral.dissis.chess.gui.*
 import edu.austral.dissis.common.entities.Coordinate
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.gameResults.GameOverGameResult
@@ -17,7 +14,7 @@ import edu.austral.ingsis.clientserver.Server
 import edu.austral.ingsis.clientserver.ServerBuilder
 import edu.austral.ingsis.clientserver.netty.server.NettyServerBuilder
 
-class Server( private val game: Game,
+class Server( private var game: Game,
               private val builder: ServerBuilder=NettyServerBuilder.createDefault()) {
     private val server:Server
     init {
@@ -27,6 +24,7 @@ class Server( private val game: Game,
     private fun buildServer():Server{
         return builder
             .withPort(8080)
+            .withConnectionListener(ServerConnectionListener(this))
             .addMessageListener("move",
                 object : TypeReference<Message<Move>> (){},
                 GameMoveListener(this))
@@ -39,24 +37,33 @@ class Server( private val game: Game,
 
         when(val result = game.move(from,to)){
             is ValidGameResult->{
-                server.broadcast(Message("new-game-state", NewGameState(uiPieces(result.getGame().getBoard()), getCurrentPlayerColor(result.getGame().getCurrentPlayer()))))
+                val newGame = result.getGame()
+                game = newGame
+                server.broadcast(Message("new-game-state", NewGameState(uiPieces(newGame.getBoard()), getCurrentPlayerColor(newGame.getCurrentPlayer()))))
             }
             is InvalidGameResult->{
                 server.broadcast(Message("invalid-move",InvalidMove(result.getMessage())))
             }
             is GameOverGameResult->{
-                server.broadcast(Message("game-over",GameOver(result.getWinner())))
+                server.broadcast(Message("game-over",GameOver(getCurrentPlayerColor( result.getGameWinner()))))
             }
         }
     }
     fun getGame():Game{
-        TODO()
+        return this.game
     }
     fun getServer():Server{
         return this.server
     }
 
+    fun handleClientConnection(clientId: String) {
+        server.sendMessage(clientId,Message("initial-state",getInitialState()))
+    }
 
+    private fun getInitialState():InitialState{
+        val boardSize = BoardSize(game.getBoard().getXDimension(),game.getBoard().getYDimension())
+        return InitialState(boardSize, uiPieces(game.getBoard()), getCurrentPlayerColor(game.getCurrentPlayer()))
+    }
 
 
 }
