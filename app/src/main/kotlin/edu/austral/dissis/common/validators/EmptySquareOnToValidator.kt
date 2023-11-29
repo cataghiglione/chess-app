@@ -9,7 +9,8 @@ import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 class EmptySquareOnToValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
-        return if (game.getBoard().getSquareContent(movement.getTo()) == null) {
+        val possiblePiece=game.getBoard().getSquareContent(movement.getTo())
+        return if (possiblePiece == null) {
             ValidMovementResult()
         } else InvalidMovementResult("Invalid movement")
     }

@@ -1,5 +1,5 @@
 import edu.austral.dissis.checkers.CheckersMovementExecutioner
-import edu.austral.dissis.checkers.CheckersTurnManager
+import edu.austral.dissis.checkers.turnManagers.CheckersTurnManager
 import edu.austral.dissis.checkers.endGameValidators.NoPiecesLeftValidator
 import edu.austral.dissis.checkers.endGameValidators.NoPossibleMovementsValidator
 import edu.austral.dissis.checkers.entities.CheckersPieceName
@@ -241,12 +241,12 @@ class Adapter : GameEngine {
     }
 
     fun createClassicChessGame(): Game {
-        val gameBoard: MutableMap<Coordinate?, Piece?> = HashMap()
+        val gameBoard: MutableMap<Coordinate, Piece?> = HashMap()
         val board: Board = Board(gameBoard, 8, 8)
         val gameMoveValidators: MutableList<Validator> = chessGameValidators(ArrayList<Validator>())
         val checkMateValidators = chessCheckMateValidators(ArrayList<endGameValidator>())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        val chessMovementExecutioner = ChessMovementExecutioner(listOf(ChessPawnPromotion()))
+        val chessMovementExecutioner = ChessMovementExecutioner(emptyList())
         pieceRules[Piece(ChessPieceName.KING, PieceColor.WHITE, 13)] = chessKingRule()
         pieceRules[Piece(ChessPieceName.KING, PieceColor.BLACK, 29)] = chessKingRule()
         pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)] = queenRule()
@@ -303,12 +303,12 @@ class Adapter : GameEngine {
     }
 
     fun createClassicCheckersGame():Game{
-        val gameBoard: MutableMap<Coordinate?, Piece?> = HashMap()
+        val gameBoard: MutableMap<Coordinate, Piece?> = HashMap()
         val board: Board = Board(gameBoard, 8, 8)
         val gameMoveValidators: MutableList<Validator> = checkersGameValidators(ArrayList())
         val endGameValidators = checkersEndGameValidators(ArrayList())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        val checkersExecutioner = CheckersMovementExecutioner(listOf(EatingMovement(), CheckersPawnPromotion()))
+        val checkersExecutioner = CheckersMovementExecutioner(emptyList())
         val checkersManager = CheckersTurnManager(-1)
         for (i in 1..12) {
             pieceRules[Piece(CheckersPieceName.PAWN, PieceColor.WHITE, i)] = checkersPawnsRule(PieceColor.WHITE)

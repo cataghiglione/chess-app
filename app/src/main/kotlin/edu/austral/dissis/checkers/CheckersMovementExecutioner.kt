@@ -2,27 +2,30 @@ package edu.austral.dissis.checkers
 
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
+import edu.austral.dissis.common.interfaces.Action
 import edu.austral.dissis.common.interfaces.MovementExecutioner
 import edu.austral.dissis.common.interfaces.SpecialMovement
 
-class CheckersMovementExecutioner(private val specialMovements : List<SpecialMovement>): MovementExecutioner {
+class CheckersMovementExecutioner(private val actions : List<Action>): MovementExecutioner {
 
     override fun getNewGame(movement: Movement, game: Game): Game {
-        var newGame  = game
-        var isSpecialMovement = false
-        for (specialMovement in specialMovements){
-            if (specialMovement.isSpecialMovement(movement,newGame)){
-                isSpecialMovement=true
-                newGame = specialMovement.getNewGame(movement,newGame)
-            }
-        }
-        if (!isSpecialMovement){
-            val newBoards = game.getMovements().toList() + game.getBoard()
-            return newGame.copy(board = newGame.getBoard().move(movement), movements = newBoards, currentPlayer = newGame.getTurnManager().getNewTurn(newGame,movement))
-        }
-        return newGame
+        val action = lookupSuitableMovement(movement, game)
+        return action?.executeAction(movement, game) ?: normalMovementGetNewGame(game, movement)
 
-//        return Game(game.getBoard().move(movement),newBoards,game.getValidators(),game.getRules(),game.getTurnManager().getNewTurn(game,movement),game
-//            .getCheckMateValidators(),game.getMovementExecutioner(),game.getTurnManager() )
+    }
+    private fun lookupSuitableMovement(
+        movement: Movement,
+        game: Game
+    ) = actions.firstOrNull { it.validateAction(movement,game) }
+    private fun normalMovementGetNewGame(
+        game: Game,
+        movement: Movement
+    ): Game {
+        val newBoards = game.getMovements().toList() + game.getBoard()
+        return game.copy(
+            board = game.getBoard().move(movement),
+            movements = newBoards,
+            currentPlayer = game.getTurnManager().getNewTurn(game, movement)
+        )
     }
 }

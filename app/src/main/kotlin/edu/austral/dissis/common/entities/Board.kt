@@ -1,44 +1,39 @@
 package edu.austral.dissis.common.entities
 
 
-class Board(val board: Map<Coordinate?, Piece?>, private val xDimension: Int, private val yDimension: Int) {
+data class Board(val board: Map<Coordinate, Piece?>, private val horizontalDimension: Int, private val verticalDimension: Int) {
 
     fun move(movement: Movement): Board {
-        val auxBoard: MutableMap<Coordinate?, Piece?> = HashMap(board)
-        val piece = auxBoard[movement.getFrom()]
-        auxBoard.remove(movement.getFrom())
-        auxBoard[movement.getTo()] = piece!!.copy(piece.getName(),piece.getColor(),piece.getId())
-        val newBoard: HashMap<Coordinate?, Piece?> = HashMap(auxBoard)
-        return Board(newBoard, xDimension, yDimension)
+        return this.removePiece(movement.getFrom())
+            .addPiece(movement.getTo(), this.getSquareContent(movement.getFrom())!!)
     }
-    fun getXDimension(): Int {
-        return xDimension
+    fun getHorizontalDimension(): Int {
+        return horizontalDimension
     }
-    fun getYDimension(): Int {
-        return yDimension
+    fun getVerticalDimension(): Int {
+        return verticalDimension
     }
     fun getSquareContent(square: Coordinate): Piece? {
         return this.board[square]
     }
      fun getInvertedBoard() : Map<Piece, Coordinate>{
             val invertedBoard: MutableMap<Piece, Coordinate> = HashMap()
-            for (entry in board.entries) {
+            for (entry in board.
+            entries) {
                 invertedBoard[entry.value!!] = entry.key!!
             }
             return invertedBoard
      }
+
+    fun addPiece(coordinate: Coordinate, piece: Piece): Board {
+        return copy(board = board + (coordinate to piece))
+    }
     fun replacePiece(movement: Movement, piece: Piece): Board {
-        val auxBoard: MutableMap<Coordinate?, Piece?> = HashMap(board)
-        auxBoard.remove(movement.getFrom())
-        auxBoard[movement.getTo()] = piece
-        val newBoard: HashMap<Coordinate?, Piece?> = HashMap(auxBoard)
-        return Board(newBoard, xDimension, yDimension)
+        return this.removePiece(movement.getFrom())
+            .addPiece(movement.getTo(), piece)
     }
     fun removePiece(coordinate: Coordinate):Board{
-        val auxBoard: MutableMap<Coordinate?, Piece?> = HashMap(board)
-        auxBoard.remove(coordinate)
-        val newBoard: HashMap<Coordinate?, Piece?> = HashMap(auxBoard)
-        return Board(newBoard, xDimension, yDimension)
+        return copy(board = board - coordinate)
     }
 }
 

@@ -1,7 +1,6 @@
 package edu.austral.dissis.checkers.specialMovements
 
 import edu.austral.dissis.checkers.entities.CheckersPieceName
-import edu.austral.dissis.chess.entities.ChessPieceName
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.common.entities.Piece
@@ -15,11 +14,11 @@ class CheckersPawnPromotion : SpecialMovement {
         if (piece != null) {
             if (piece.getName() == CheckersPieceName.PAWN) {
                 if (getOrientation(piece)) {
-                    if (movement.getTo().yCoordinate == 8) {
+                    if (movement.getTo().row == 8) {
                         return true
                     }
                 } else {
-                    if (movement.getTo().yCoordinate == 1) {
+                    if (movement.getTo().row == 1) {
                         return true
                     }
                 }

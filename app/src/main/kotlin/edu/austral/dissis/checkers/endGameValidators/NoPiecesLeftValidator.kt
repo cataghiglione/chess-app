@@ -6,12 +6,11 @@ import edu.austral.dissis.common.interfaces.endGameValidator
 class NoPiecesLeftValidator : endGameValidator {
     override fun validateEndGame(game: Game): Boolean {
         val currentPlayer = game.getCurrentPlayer()
-        val boardKeys = game.getBoard().board.keys
-        for (key in boardKeys){
-            if (game.getBoard().board[key]?.getColor() == currentPlayer){
-                return false
-            }
+        val boardKeys = game.getBoard().getInvertedBoard().keys
+        val piecesList=boardKeys.filter { it.getColor() == currentPlayer}
+        if (piecesList.isEmpty()) {
+            return true
         }
-        return true
+        else return false
     }
 }

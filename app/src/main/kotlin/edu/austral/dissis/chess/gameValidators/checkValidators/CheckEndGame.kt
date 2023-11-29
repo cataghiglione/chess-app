@@ -19,8 +19,8 @@ class CheckEndGame : endGameValidator {
             if (key.getColor() == game.getCurrentPlayer() && key.getName() == ChessPieceName.KING) {
                 val ownPieces = getOwnPieces(invertedBoard, game)
                 for (piece in ownPieces) {
-                    for (i in 1 until game.getBoard().getXDimension()) {
-                        for (j in 1 until game.getBoard().getYDimension()) {
+                    for (i in 1 until game.getBoard().getHorizontalDimension()) {
+                        for (j in 1 until game.getBoard().getVerticalDimension()) {
                             val possibleMovement = Movement(invertedBoard[piece]!!, Coordinate(i, j))
                             if (game.validateMovement(possibleMovement) is ValidMovementResult) {
                                 return false

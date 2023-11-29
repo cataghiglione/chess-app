@@ -4,8 +4,8 @@ import edu.austral.dissis.checkers.factory.ClassicCheckersGame
 import edu.austral.dissis.chess.factory.ClassicChessGame
 
 fun main(){
-    val classicChessGame = ClassicChessGame()
+    val chessGame = ClassicChessGame()
     val classicCheckersGame = ClassicCheckersGame()
-//    Server(classicChessGame.createClassicChessGame())
-    Server(classicCheckersGame.createClassicCheckersGame())
+    Server(chessGame.createClassicChessGame())
+//    Server(classicCheckersGame.createClassicCheckersGame())
 }

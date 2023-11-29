@@ -61,7 +61,7 @@ class Server( private var game: Game,
     }
 
     private fun getInitialState():InitialState{
-        val boardSize = BoardSize(game.getBoard().getXDimension(),game.getBoard().getYDimension())
+        val boardSize = BoardSize(game.getBoard().getHorizontalDimension(),game.getBoard().getVerticalDimension())
         return InitialState(boardSize, uiPieces(game.getBoard()), getCurrentPlayerColor(game.getCurrentPlayer()))
     }
 

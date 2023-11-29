@@ -8,31 +8,22 @@ import edu.austral.dissis.common.movementResults.InvalidMovementResult
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 import kotlin.math.abs
 
-class LimitedQuantityMoveValidator : Validator {
-    private val quantity: Int
-    constructor(quantity: Int) {
-        this.quantity = quantity
-    }
+class LimitedQuantityMoveValidator(private val quantity: Int) : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
-        val fromXCoordinate = movement.getFrom().xCoordinate;
-        val fromYCoordinate = movement.getFrom().yCoordinate;
-        val toXCoordinate = movement.getTo().xCoordinate;
-        val toYCoordinate = movement.getTo().yCoordinate;
+        val fromXCoordinate = movement.getFrom().column
+        val fromYCoordinate = movement.getFrom().row
+        val toXCoordinate = movement.getTo().column
+        val toYCoordinate = movement.getTo().row
         val xDistance = abs(fromXCoordinate - toXCoordinate)
         val yDistance = abs(fromYCoordinate - toYCoordinate)
-        return if (xDistance == yDistance){
-            if (xDistance <= quantity){
-                ValidMovementResult()
-            } else {
-                InvalidMovementResult("Invalid movement")
-            }
+
+        return if (isCorrectAmountOfSquares(xDistance, yDistance)) {
+            ValidMovementResult()
         } else {
-            if(xDistance + yDistance <= quantity){
-                ValidMovementResult()
-            } else {
-                InvalidMovementResult("Invalid movement")
-            }
+            InvalidMovementResult("Invalid movement")
         }
     }
 
+    private fun isCorrectAmountOfSquares(xDistance: Int, yDistance: Int) =
+        (xDistance == yDistance && xDistance <= quantity) || (xDistance + yDistance <= quantity)
 }

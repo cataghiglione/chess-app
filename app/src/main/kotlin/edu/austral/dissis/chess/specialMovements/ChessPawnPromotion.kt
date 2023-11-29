@@ -7,29 +7,21 @@ import edu.austral.dissis.common.interfaces.Validator
 
 class ChessPawnPromotion : SpecialMovement {
     override fun isSpecialMovement(movement: Movement, game: Game): Boolean {
-        val piece = game.getBoard().getSquareContent(movement.getFrom())
-        if (piece != null) {
-            if (piece.getName() == ChessPieceName.PAWN) {
-                if (getOrientation(piece)) {
-                    if (movement.getTo().yCoordinate == 8) {
-                        return true
-                    }
-                } else {
-                    if (movement.getTo().yCoordinate == 0) {
-                        return true
-                    }
-                }
-            }
-
-            return false
+        val piece = game.getBoard().getSquareContent(movement.getFrom()) ?: return false
+        if (piece.getName() != ChessPieceName.PAWN) return false
+        val pieceOrientation = getOrientation(piece)
+        return isAtTheEndOfTheBoard(pieceOrientation, movement)
+    }
+    private fun isAtTheEndOfTheBoard(orientation: Boolean, movement: Movement): Boolean {
+        return if (orientation) {
+            movement.getTo().row == 8
+        } else {
+            movement.getTo().row == 1
         }
-        return false
     }
 
     override fun getNewGame(movement: Movement, game: Game): Game {
         val piece = game.getBoard().getSquareContent(movement.getFrom())
-//        val pieceColor = piece!!.getColor()
-//        val pieceName = ChessPieceName.QUEEN
         val newQueen = createQueen(piece!!)
         val queenValidator = findQueenRules(game)!!
         val newRules = game.getRules().toMutableMap()
@@ -37,16 +29,12 @@ class ChessPawnPromotion : SpecialMovement {
         newRules[newQueen] = queenValidator
         val newBoard = game.getBoard().replacePiece(movement, newQueen)
         val newBoards = game.getMovements().toList() + game.getBoard()
-        return game.copy(board = newBoard,movements=newBoards,rules = newRules, currentPlayer = game.getTurnManager().getNewTurn(game,movement))
-//        return Game(
-//            Board(newBoard, game.getBoard().getXDimension(), game.getBoard().getYDimension()),
-//            newBoards,
-//            game.getValidators(),
-//            newRules,
-//            game.oppositePlayer(),
-//            game.getCheckMateValidators(),
-//            game.getMovementExecutioner(),game.getTurnManager()
-//        )
+        return game.copy(
+            board = newBoard,
+            movements = newBoards,
+            rules = newRules,
+            currentPlayer = game.getTurnManager().getNewTurn(game, movement)
+        )
     }
 
     private fun getOrientation(piece: Piece): Boolean {
@@ -62,6 +50,7 @@ class ChessPawnPromotion : SpecialMovement {
         }
         return null
     }
+
     private fun createQueen(piece: Piece): Piece {
         val pieceColor = piece.getColor()
         val pieceName = ChessPieceName.QUEEN

@@ -10,12 +10,11 @@ import edu.austral.dissis.common.movementResults.ValidMovementResult
 class EnemyOnToValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
         val pieceInTo = game.getBoard().getSquareContent(movement.getTo())
-        if (pieceInTo != null) {
-            return if (pieceInTo.getColor() != game.getCurrentPlayer()) {
-                return ValidMovementResult()
-            } else InvalidMovementResult("Invalid movement")
-        }
-        return InvalidMovementResult("Invalid movement")
-    }
 
+        return if (pieceInTo != null && pieceInTo.getColor() != game.getCurrentPlayer()) {
+            ValidMovementResult()
+        } else {
+            InvalidMovementResult("Invalid movement")
+        }
+    }
 }

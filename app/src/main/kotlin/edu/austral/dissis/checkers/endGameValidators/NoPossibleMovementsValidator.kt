@@ -12,8 +12,8 @@ class NoPossibleMovementsValidator: endGameValidator {
         val invertedBoard = game.getBoard().getInvertedBoard()
         val ownPieces = getOwnPieces(invertedBoard, game)
         for (piece in ownPieces) {
-            for (i in 1 until game.getBoard().getXDimension()) {
-                for (j in 1 until game.getBoard().getYDimension()) {
+            for (i in 1 until game.getBoard().getHorizontalDimension()) {
+                for (j in 1 until game.getBoard().getVerticalDimension()) {
                     val possibleMovement = Movement(invertedBoard[piece]!!, Coordinate(i, j))
                     if (game.validateMovement(possibleMovement) is ValidMovementResult) {
                         return false
