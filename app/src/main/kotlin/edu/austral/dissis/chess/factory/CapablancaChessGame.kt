@@ -3,7 +3,6 @@ package edu.austral.dissis.chess.factory
 import edu.austral.dissis.chess.ChessMovementExecutioner
 import edu.austral.dissis.chess.ClassicChessTurnManager
 import edu.austral.dissis.chess.actionValidators.ExactQuantityMoveValidator
-import edu.austral.dissis.common.actionValidators.IsAtTheEndOfTheBoardValidator
 import edu.austral.dissis.chess.actionValidators.IsChessPawnValidator
 import edu.austral.dissis.chess.actionValidators.IsHorizontalLeftOrientationValidator
 import edu.austral.dissis.chess.actionValidators.IsHorizontalRightOrientationValidator
@@ -20,7 +19,9 @@ import edu.austral.dissis.chess.orientationValidators.LMovementValidator
 import edu.austral.dissis.chess.orientationValidators.VerticalMovementMoveValidator
 import edu.austral.dissis.chess.quantityValidators.FirstMovementValidator
 import edu.austral.dissis.chess.quantityValidators.LimitedQuantityMoveValidator
+import edu.austral.dissis.common.actionValidators.IsAtTheEndOfTheBoardValidator
 import edu.austral.dissis.common.actions.NormalMoveAction
+import edu.austral.dissis.common.endGames.NoPiecesLeftValidator
 import edu.austral.dissis.common.entities.*
 import edu.austral.dissis.common.interfaces.Action
 import edu.austral.dissis.common.interfaces.Validator
@@ -31,9 +32,8 @@ import edu.austral.dissis.utils.or
 import gameValidators.checkValidators.CheckEndGame
 import gameValidators.checkValidators.CheckValidator
 
-class ClassicChessGame {
-
-    private fun chessRightCastlingValidator(): Validator{
+class CapablancaChessGame {
+    private fun chessRightCastlingValidator(): Validator {
         return or(
             and(
                 IsHorizontalRightOrientationValidator(),
@@ -45,7 +45,7 @@ class ClassicChessGame {
         )
     }
 
-    private fun chessLeftCastlingValidator():Validator{
+    private fun chessLeftCastlingValidator(): Validator {
         return or(
             and(
                 IsHorizontalLeftOrientationValidator(),
@@ -57,7 +57,7 @@ class ClassicChessGame {
             )
         )
     }
-    private fun chessPromotionValidator(): Validator{
+    private fun chessPromotionValidator(): Validator {
         return or(
             and(
                 IsChessPawnValidator(),
@@ -286,7 +286,8 @@ class ClassicChessGame {
                 DiagonalObstacleMoveValidator(),
                 DiagonalMovementMoveValidator()
             ),
-            and(LMovementValidator()
+            and(
+                LMovementValidator()
             )
         )
     }
@@ -325,16 +326,98 @@ class ClassicChessGame {
     private fun chessCheckMateValidators(checkMateValidators: ArrayList<endGameValidator>): ArrayList<endGameValidator> {
         val checkMateValidator = CheckEndGame()
         checkMateValidators.add(checkMateValidator)
+        val noPiecesLeftValidator = NoPiecesLeftValidator()
+        checkMateValidators.add(noPiecesLeftValidator)
         return checkMateValidators
     }
 
-    fun createChancellorChessGame(): Game {
+    private fun uploadActions(actions: MutableList<Action>):List<Action>{
+        val chessPawnPromotionAction = ChessPawnPromotionAction(chessPromotionValidator())
+        actions.add(chessPawnPromotionAction)
+        val chessRightCastlingAction = ChessRightCastlingAction(chessRightCastlingValidator())
+        actions.add(chessRightCastlingAction)
+        val chessLeftCastlingAction = ChessLeftCastlingAction(chessLeftCastlingValidator())
+        actions.add(chessLeftCastlingAction)
+
+        actions.add(NormalMoveAction())
+        return actions
+
+    }
+    private fun putCapablancaChessPiecesIntoPlace(gameBoard: MutableMap<Coordinate, Piece?>) {
+        for (i in 1..10) {
+            gameBoard[Coordinate(i, 2)] = Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)
+            gameBoard[Coordinate(i, 7)] = Piece(ChessPieceName.PAWN, PieceColor.BLACK, i + 16)
+        }
+        gameBoard[Coordinate(5, 1)] = Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 11)
+        gameBoard[Coordinate(6, 1)] = Piece(ChessPieceName.KING, PieceColor.WHITE, 12)
+        gameBoard[Coordinate(5, 8)] = Piece(ChessPieceName.QUEEN, PieceColor.BLACK, 13)
+        gameBoard[Coordinate(6, 8)] = Piece(ChessPieceName.KING, PieceColor.BLACK, 14)
+
+        gameBoard[Coordinate(1, 1)] = Piece(ChessPieceName.ROOK, PieceColor.WHITE, 15)
+        gameBoard[Coordinate(10, 1)] = Piece(ChessPieceName.ROOK, PieceColor.WHITE, 16)
+        gameBoard[Coordinate(1, 8)] = Piece(ChessPieceName.ROOK, PieceColor.BLACK, 27)
+        gameBoard[Coordinate(10, 8)] = Piece(ChessPieceName.ROOK, PieceColor.BLACK, 28)
+
+        gameBoard[Coordinate(4, 1)] = Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 29)
+        gameBoard[Coordinate(7, 1)] = Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 30)
+        gameBoard[Coordinate(4, 8)] = Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 31)
+        gameBoard[Coordinate(8, 8)] = Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 32)
+
+        gameBoard[Coordinate(2, 1)] = Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 33)
+        gameBoard[Coordinate(9, 1)] = Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 34)
+        gameBoard[Coordinate(2, 8)] = Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 35)
+        gameBoard[Coordinate(9, 8)] = Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 36)
+
+        gameBoard[Coordinate(3,1)] = Piece(ChessPieceName.ARCHBISHOP, PieceColor.WHITE, 37)
+        gameBoard[Coordinate(3,8)] = Piece(ChessPieceName.ARCHBISHOP, PieceColor.BLACK, 39)
+        gameBoard[Coordinate(8,1)] = Piece(ChessPieceName.CHANCELLOR, PieceColor.WHITE, 38)
+        gameBoard[Coordinate(7,8)] = Piece(ChessPieceName.CHANCELLOR, PieceColor.BLACK, 40)
+
+    }
+    private fun uploadCapablancaChessRules(pieceRules: MutableMap<Piece, Validator>) {
+        for (i in 1..10) {
+            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)] = chessPawnsRule(PieceColor.WHITE)
+        }
+        for (i in 17..26) {
+            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.BLACK, i)] = chessPawnsRule(PieceColor.BLACK)
+        }
+        pieceRules[Piece(ChessPieceName.KING, PieceColor.WHITE, 12)] = chessKingRule()
+        pieceRules[Piece(ChessPieceName.KING, PieceColor.BLACK, 14)] = chessKingRule()
+
+        pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 11)] = queenRule()
+        pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.BLACK, 13)] = queenRule()
+
+        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 29)] = bishopRule()
+        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 30)] = bishopRule()
+
+        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 33)] = knightRule()
+        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 34)] = knightRule()
+
+        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.WHITE, 15)] = rookRule()
+        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.WHITE, 16)] = rookRule()
+
+        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 31)] = bishopRule()
+        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 32)] = bishopRule()
+
+        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 35)] = knightRule()
+        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 36)] = knightRule()
+
+        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.BLACK, 27)] = rookRule()
+        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.BLACK, 28)] = rookRule()
+
+        pieceRules[Piece(ChessPieceName.ARCHBISHOP, PieceColor.WHITE, 37)] = archbishopRule()
+        pieceRules[Piece(ChessPieceName.ARCHBISHOP, PieceColor.BLACK, 39)] = archbishopRule()
+
+        pieceRules[Piece(ChessPieceName.CHANCELLOR, PieceColor.WHITE, 38)] = chancellorRule()
+        pieceRules[Piece(ChessPieceName.CHANCELLOR, PieceColor.BLACK, 40)] = chancellorRule()
+    }
+    fun createCapablancaChessGame(): Game {
         val gameBoard: MutableMap<Coordinate, Piece?> = HashMap()
-        val board: Board = Board(gameBoard, 8, 8)
+        val board: Board = Board(gameBoard, 10, 8)
         val gameMoveValidators: MutableList<Validator> = chessGameValidators(ArrayList<Validator>())
         val checkMateValidators = chessCheckMateValidators(ArrayList<endGameValidator>())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        uploadChancellorChessRules(pieceRules)
+        uploadCapablancaChessRules(pieceRules)
         val actions = uploadActions(ArrayList<Action>())
         val chessMovementExecutioner = ChessMovementExecutioner(actions)
         val chessManager = ClassicChessTurnManager()
@@ -351,163 +434,12 @@ class ClassicChessGame {
 
             )
 
-        putChancellorChessPiecesIntoPlace(gameBoard)
+        putCapablancaChessPiecesIntoPlace(gameBoard)
         return game
 
     }
 
-    fun createClassicChessGame(): Game {
-        val gameBoard = putClassicChessPiecesIntoPlace(HashMap())
-        val board: Board = Board(gameBoard, 8, 8)
 
-        val gameMoveValidators: MutableList<Validator> = chessGameValidators(ArrayList<Validator>())
-
-        val checkMateValidators = chessCheckMateValidators(ArrayList<endGameValidator>())
-
-        val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        uploadClassicChessRules(pieceRules)
-
-        val actions = uploadActions(ArrayList<Action>())
-
-        val chessMovementExecutioner = ChessMovementExecutioner(actions)
-        val chessManager = ClassicChessTurnManager()
-        val game =
-            Game(
-                board,
-                ArrayList<Board>(),
-                gameMoveValidators,
-                pieceRules,
-                PieceColor.WHITE,
-                checkMateValidators,
-                chessMovementExecutioner,
-                chessManager,
-            )
-
-        return game
-    }
-
-    private fun putClassicChessPiecesIntoPlace(gameBoard: MutableMap<Coordinate, Piece>): Map<Coordinate, Piece> {
-        for (i in 1..8) {
-            gameBoard[Coordinate(i, 2)] = Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)
-            gameBoard[Coordinate(i, 7)] = Piece(ChessPieceName.PAWN, PieceColor.BLACK, i + 16)
-        }
-        gameBoard[Coordinate(4, 1)] = Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)
-        gameBoard[Coordinate(5, 1)] = Piece(ChessPieceName.KING, PieceColor.WHITE, 13)
-        gameBoard[Coordinate(4, 8)] = Piece(ChessPieceName.QUEEN, PieceColor.BLACK, 28)
-        gameBoard[Coordinate(5, 8)] = Piece(ChessPieceName.KING, PieceColor.BLACK, 29)
-
-        gameBoard[Coordinate(1, 1)] = Piece(ChessPieceName.ROOK, PieceColor.WHITE, 9)
-        gameBoard[Coordinate(8, 1)] = Piece(ChessPieceName.ROOK, PieceColor.WHITE, 16)
-        gameBoard[Coordinate(1, 8)] = Piece(ChessPieceName.ROOK, PieceColor.BLACK, 25)
-        gameBoard[Coordinate(8, 8)] = Piece(ChessPieceName.ROOK, PieceColor.BLACK, 32)
-
-        gameBoard[Coordinate(2, 1)] = Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 10)
-        gameBoard[Coordinate(7, 1)] = Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 15)
-        gameBoard[Coordinate(2, 8)] = Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 26)
-        gameBoard[Coordinate(7, 8)] = Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 31)
-
-        gameBoard[Coordinate(3, 1)] = Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 11)
-        gameBoard[Coordinate(6, 1)] = Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 14)
-        gameBoard[Coordinate(3, 8)] = Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 27)
-        gameBoard[Coordinate(6, 8)] = Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 30)
-        return gameBoard
-    }
-
-    private fun uploadClassicChessRules(pieceRules: MutableMap<Piece, Validator>) {
-        for (i in 1..8) {
-            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)] = chessPawnsRule(PieceColor.WHITE)
-        }
-        for (i in 17..24) {
-            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.BLACK, i)] = chessPawnsRule(PieceColor.BLACK)
-        }
-        pieceRules[Piece(ChessPieceName.KING, PieceColor.WHITE, 13)] = chessKingRule()
-        pieceRules[Piece(ChessPieceName.KING, PieceColor.BLACK, 29)] = chessKingRule()
-        pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)] = queenRule()
-        pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.BLACK, 28)] = queenRule()
-        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.WHITE, 9)] = rookRule()
-        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.WHITE, 16)] = rookRule()
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 10)] = knightRule()
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 15)] = knightRule()
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 11)] = bishopRule()
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 14)] = bishopRule()
-        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.BLACK, 25)] = rookRule()
-        pieceRules[Piece(ChessPieceName.ROOK, PieceColor.BLACK, 32)] = rookRule()
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 26)] = knightRule()
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 31)] = knightRule()
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 27)] = bishopRule()
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 30)] = bishopRule()
-    }
-
-    private fun uploadChancellorChessRules(pieceRules: MutableMap<Piece, Validator>) {
-        for (i in 1..8) {
-            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)] = chessPawnsRule(PieceColor.WHITE)
-        }
-        for (i in 17..24) {
-            pieceRules[Piece(ChessPieceName.PAWN, PieceColor.BLACK, i)] = chessPawnsRule(PieceColor.BLACK)
-        }
-        pieceRules[Piece(ChessPieceName.KING, PieceColor.WHITE, 13)] = chessKingRule()
-        pieceRules[Piece(ChessPieceName.KING, PieceColor.BLACK, 29)] = chessKingRule()
-
-        pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)] = queenRule()
-        pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.BLACK, 28)] = queenRule()
-
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 11)] = bishopRule()
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 14)] = bishopRule()
-
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 10)] = knightRule()
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 15)] = knightRule()
-
-        pieceRules[Piece(ChessPieceName.CHANCELLOR, PieceColor.WHITE, 9)] = chancellorRule()
-        pieceRules[Piece(ChessPieceName.CHANCELLOR, PieceColor.WHITE, 16)] = chancellorRule()
-
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 27)] = bishopRule()
-        pieceRules[Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 30)] = bishopRule()
-
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 26)] = knightRule()
-        pieceRules[Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 31)] = knightRule()
-
-        pieceRules[Piece(ChessPieceName.CHANCELLOR, PieceColor.BLACK, 25)] = chancellorRule()
-        pieceRules[Piece(ChessPieceName.CHANCELLOR, PieceColor.BLACK, 32)] = chancellorRule()
-    }
-
-    private fun putChancellorChessPiecesIntoPlace(gameBoard: MutableMap<Coordinate, Piece?>) {
-        for (i in 1..8) {
-            gameBoard[Coordinate(i, 2)] = Piece(ChessPieceName.PAWN, PieceColor.WHITE, i)
-            gameBoard[Coordinate(i, 7)] = Piece(ChessPieceName.PAWN, PieceColor.BLACK, i + 16)
-        }
-        gameBoard[Coordinate(4, 1)] = Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)
-        gameBoard[Coordinate(5, 1)] = Piece(ChessPieceName.KING, PieceColor.WHITE, 13)
-        gameBoard[Coordinate(4, 8)] = Piece(ChessPieceName.QUEEN, PieceColor.BLACK, 28)
-        gameBoard[Coordinate(5, 8)] = Piece(ChessPieceName.KING, PieceColor.BLACK, 29)
-
-        gameBoard[Coordinate(1, 1)] = Piece(ChessPieceName.CHANCELLOR, PieceColor.WHITE, 9)
-        gameBoard[Coordinate(8, 1)] = Piece(ChessPieceName.CHANCELLOR, PieceColor.WHITE, 16)
-        gameBoard[Coordinate(1, 8)] = Piece(ChessPieceName.CHANCELLOR, PieceColor.BLACK, 25)
-        gameBoard[Coordinate(8, 8)] = Piece(ChessPieceName.CHANCELLOR, PieceColor.BLACK, 32)
-
-        gameBoard[Coordinate(3, 1)] = Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 11)
-        gameBoard[Coordinate(6, 1)] = Piece(ChessPieceName.BISHOP, PieceColor.WHITE, 14)
-        gameBoard[Coordinate(3, 8)] = Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 27)
-        gameBoard[Coordinate(6, 8)] = Piece(ChessPieceName.BISHOP, PieceColor.BLACK, 30)
-
-        gameBoard[Coordinate(2, 1)] = Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 10)
-        gameBoard[Coordinate(7, 1)] = Piece(ChessPieceName.KNIGHT, PieceColor.WHITE, 15)
-        gameBoard[Coordinate(2, 8)] = Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 26)
-        gameBoard[Coordinate(7, 8)] = Piece(ChessPieceName.KNIGHT, PieceColor.BLACK, 31)
-
-    }
-    private fun uploadActions(actions: MutableList<Action>):List<Action>{
-        val chessPawnPromotionAction = ChessPawnPromotionAction(chessPromotionValidator())
-        actions.add(chessPawnPromotionAction)
-        val chessRightCastlingAction = ChessRightCastlingAction(chessRightCastlingValidator())
-        actions.add(chessRightCastlingAction)
-        val chessLeftCastlingAction = ChessLeftCastlingAction(chessLeftCastlingValidator())
-        actions.add(chessLeftCastlingAction)
-
-        actions.add(NormalMoveAction())
-        return actions
-
-    }
 
 
 }

@@ -6,14 +6,10 @@ import edu.austral.dissis.checkers.actions.CheckersEatingAction
 import edu.austral.dissis.checkers.actions.CheckersNormalPromotionAction
 import edu.austral.dissis.checkers.actions.CheckersPromotionAndEatingAction
 import edu.austral.dissis.checkers.turnManagers.CheckersTurnManager
-import edu.austral.dissis.checkers.endGameValidators.NoPiecesLeftValidator
-import edu.austral.dissis.checkers.endGameValidators.NoPossibleMovementsValidator
+import edu.austral.dissis.common.endGames.NoPiecesLeftValidator
 import edu.austral.dissis.checkers.entities.CheckersPieceName
-import edu.austral.dissis.checkers.specialMovements.CheckersPawnPromotion
-import edu.austral.dissis.checkers.specialMovements.EatingMovement
 import edu.austral.dissis.checkers.validators.CanEatValidator
 import edu.austral.dissis.checkers.validators.MustEatPieceValidator
-import edu.austral.dissis.chess.actions.ChessPawnPromotionAction
 import edu.austral.dissis.chess.quantityValidators.LimitedQuantityMoveValidator
 import edu.austral.dissis.common.actionValidators.IsAtTheEndOfTheBoardValidator
 import edu.austral.dissis.common.actions.NormalMoveAction

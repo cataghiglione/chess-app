@@ -1,15 +1,21 @@
 package edu.austral.dissis.checkers.actions
 
 import edu.austral.dissis.checkers.turnManagers.CheckersTurnManager
+import edu.austral.dissis.common.entities.ClassicActionResult
 import edu.austral.dissis.common.entities.Coordinate
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.common.interfaces.Action
+import edu.austral.dissis.common.interfaces.ActionResult
 import edu.austral.dissis.common.interfaces.Validator
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 class CheckersEatingAction(private val validator: Validator) : Action {
-    override fun executeAction(movement: Movement, game: Game): Game {
+    override fun executeAction(movement: Movement, game: Game): ActionResult {
+        if (!validateAction(movement, game)) {
+            return ClassicActionResult(false, game)
+        }
+
         val from = movement.getFrom()
         val to = movement.getTo()
         val pieceToEatCoordinate =
@@ -21,12 +27,13 @@ class CheckersEatingAction(private val validator: Validator) : Action {
         val gameAfterEating = game.copy(board = auxBoard, movements = newBoards)
         val possiblePieceId = checkIfCanEatAgain(movement, gameAfterEating)
         val newTurnManager = CheckersTurnManager(possiblePieceId)
-        return game.copy(
+        val newGame= game.copy(
             board = auxBoard,
             movements = newBoards,
             currentPlayer = newTurnManager.getNewTurn(game, movement),
             turnManager = newTurnManager
         )
+        return ClassicActionResult(true, newGame)
     }
 
     override fun validateAction(movement: Movement, game: Game): Boolean {

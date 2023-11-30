@@ -20,12 +20,12 @@ data class Board(val board: Map<Coordinate, Piece?>, private val horizontalDimen
             val invertedBoard: MutableMap<Piece, Coordinate> = HashMap()
             for (entry in board.
             entries) {
-                invertedBoard[entry.value!!] = entry.key!!
+                invertedBoard[entry.value!!] = entry.key
             }
             return invertedBoard
      }
 
-    fun addPiece(coordinate: Coordinate, piece: Piece): Board {
+    private fun addPiece(coordinate: Coordinate, piece: Piece): Board {
         return copy(board = board + (coordinate to piece))
     }
     fun replacePiece(movement: Movement, piece: Piece): Board {

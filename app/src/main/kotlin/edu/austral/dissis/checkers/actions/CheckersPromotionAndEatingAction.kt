@@ -2,17 +2,17 @@ package edu.austral.dissis.checkers.actions
 
 import edu.austral.dissis.checkers.entities.CheckersPieceName
 import edu.austral.dissis.checkers.turnManagers.CheckersTurnManager
-import edu.austral.dissis.common.entities.Coordinate
-import edu.austral.dissis.common.entities.Game
-import edu.austral.dissis.common.entities.Movement
-import edu.austral.dissis.common.entities.Piece
+import edu.austral.dissis.common.entities.*
 import edu.austral.dissis.common.interfaces.Action
+import edu.austral.dissis.common.interfaces.ActionResult
 import edu.austral.dissis.common.interfaces.Validator
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 import edu.austral.dissis.utils.updateRules
 
 class CheckersPromotionAndEatingAction (private val validator: Validator):Action {
-    override fun executeAction(movement: Movement, game: Game): Game {
+    override fun executeAction(movement: Movement, game: Game): ActionResult {
+        if (!validateAction(movement, game)) return ClassicActionResult(false, game)
+
         val to = movement.getTo()
         val from = movement.getFrom()
         val newBoards = game.getMovements().toList() + game.getBoard()
@@ -35,8 +35,9 @@ class CheckersPromotionAndEatingAction (private val validator: Validator):Action
         val possiblePieceId = checkIfCanEatAgainAfterPromotion(movement, gameAfterEatingAndPromotion)
         val newTurnManager = CheckersTurnManager(possiblePieceId)
 
-        return game.copy(board = finalPromotionBoard, movements = newBoards, rules = newRules,
+        val newGame =  game.copy(board = finalPromotionBoard, movements = newBoards, rules = newRules,
             currentPlayer = newTurnManager.getNewTurn(game, movement), turnManager = newTurnManager)
+        return ClassicActionResult(true, newGame)
 
 
 

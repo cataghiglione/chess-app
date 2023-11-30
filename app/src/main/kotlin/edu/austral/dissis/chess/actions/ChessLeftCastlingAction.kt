@@ -1,15 +1,16 @@
 package edu.austral.dissis.chess.actions
 
-import edu.austral.dissis.common.entities.Coordinate
-import edu.austral.dissis.common.entities.Game
-import edu.austral.dissis.common.entities.Movement
-import edu.austral.dissis.common.entities.Piece
+import edu.austral.dissis.common.entities.*
 import edu.austral.dissis.common.interfaces.Action
+import edu.austral.dissis.common.interfaces.ActionResult
 import edu.austral.dissis.common.interfaces.Validator
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 class ChessLeftCastlingAction (private val validator: Validator) : Action {
-    override fun executeAction(movement: Movement, game: Game): Game {
+    override fun executeAction(movement: Movement, game: Game): ActionResult {
+
+        if (!validateAction(movement, game)) return ClassicActionResult(false, game)
+
         val king = game.getBoard().getSquareContent(movement.getFrom())!!
         val rook =getRook(movement, game)
         val newRookCoordinate = Coordinate(movement.getTo().column + 1, movement.getFrom().row)
@@ -22,13 +23,12 @@ class ChessLeftCastlingAction (private val validator: Validator) : Action {
             .replacePiece(rookMovement, rook)
 
         val newBoards = game.getMovements().toList() + game.getBoard()
-        return game.copy(
+        val newGame =  game.copy(
             board = newBoard,
             movements = newBoards,
             currentPlayer = game.getTurnManager().getNewTurn(game, movement)
         )
-
-
+        return ClassicActionResult(true, newGame)
 
     }
 

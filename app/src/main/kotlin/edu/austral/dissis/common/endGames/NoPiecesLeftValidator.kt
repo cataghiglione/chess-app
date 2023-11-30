@@ -1,4 +1,4 @@
-package edu.austral.dissis.checkers.endGameValidators
+package edu.austral.dissis.common.endGames
 
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.interfaces.endGameValidator

@@ -1,23 +1,29 @@
 package edu.austral.dissis.chess.actions
 
 import edu.austral.dissis.chess.entities.ChessPieceName
+import edu.austral.dissis.common.entities.ClassicActionResult
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
 import edu.austral.dissis.common.entities.Piece
 import edu.austral.dissis.common.interfaces.Action
+import edu.austral.dissis.common.interfaces.ActionResult
 import edu.austral.dissis.common.interfaces.Validator
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 import edu.austral.dissis.utils.updateRules
 
 class ChessPawnPromotionAction (private val validator: Validator) : Action  {
-    override fun executeAction(movement: Movement, game: Game): Game {
+    override fun executeAction(movement: Movement, game: Game): ActionResult {
+        if (!validateAction(movement,game)) return ClassicActionResult(false,game)
+
         val piece = game.getBoard().getSquareContent(movement.getFrom())
         val queenRules = findQueenRules(game)
         val queen = createQueen(piece!!)
         val newBoard = game.getBoard().replacePiece(movement, queen)
         val newRules = updateRules(game, piece, queen,queenRules!!)
-        return game.copy(board = newBoard, movements = game.getMovements().toList() + game.getBoard(), rules = newRules,
+        val newGame= game.copy(board = newBoard, movements = game.getMovements().toList() + game.getBoard(), rules = newRules,
             currentPlayer = game.getTurnManager().getNewTurn(game,movement))
+
+        return ClassicActionResult(true,newGame)
     }
 
     override fun validateAction(movement: Movement, game: Game): Boolean {
