@@ -33,4 +33,15 @@ enum class ChessPieceName : EnumName {
         override fun getName(): String {
             return "king"
         }
-    }}
+    },
+    ARCHBISHOP{
+        override fun getName(): String {
+            return "archbishop"
+        }
+    },
+    CHANCELLOR{
+        override fun getName(): String {
+            return "chancellor"
+        }
+    }
+}

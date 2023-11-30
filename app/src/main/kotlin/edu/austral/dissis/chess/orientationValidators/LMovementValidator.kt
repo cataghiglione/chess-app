@@ -10,8 +10,8 @@ import kotlin.math.abs
 
 class LMovementValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
-        val xDistance = abs(movement.getFrom().xCoordinate - movement.getTo().xCoordinate)
-        val yDistance = abs(movement.getFrom().yCoordinate - movement.getTo().yCoordinate)
+        val xDistance = abs(movement.getFrom().column - movement.getTo().column)
+        val yDistance = abs(movement.getFrom().row - movement.getTo().row)
         return if((xDistance == 1 && yDistance == 2) || (xDistance == 2 && yDistance == 1)){
             ValidMovementResult()
         } else {

@@ -1,10 +1,8 @@
 import edu.austral.dissis.checkers.CheckersMovementExecutioner
-import edu.austral.dissis.checkers.CheckersTurnManager
-import edu.austral.dissis.checkers.endGameValidators.NoPiecesLeftValidator
+import edu.austral.dissis.checkers.turnManagers.CheckersTurnManager
+import edu.austral.dissis.common.endGames.NoPiecesLeftValidator
 import edu.austral.dissis.checkers.endGameValidators.NoPossibleMovementsValidator
 import edu.austral.dissis.checkers.entities.CheckersPieceName
-import edu.austral.dissis.checkers.specialMovements.CheckersPawnPromotion
-import edu.austral.dissis.checkers.specialMovements.EatingMovement
 import edu.austral.dissis.checkers.validators.CanEatValidator
 import edu.austral.dissis.checkers.validators.MustEatPieceValidator
 import edu.austral.dissis.chess.ChessMovementExecutioner
@@ -21,7 +19,6 @@ import edu.austral.dissis.common.entities.PieceColor
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.chess.entities.ChessPieceName
 import edu.austral.dissis.chess.quantityValidators.FirstMovementValidator
-import edu.austral.dissis.chess.specialMovements.ChessPawnPromotion
 import edu.austral.dissis.common.entities.Piece
 import edu.austral.dissis.common.gameResults.GameOverGameResult
 import edu.austral.dissis.common.gameResults.InvalidGameResult
@@ -241,12 +238,12 @@ class Adapter : GameEngine {
     }
 
     fun createClassicChessGame(): Game {
-        val gameBoard: MutableMap<Coordinate?, Piece?> = HashMap()
+        val gameBoard: MutableMap<Coordinate, Piece?> = HashMap()
         val board: Board = Board(gameBoard, 8, 8)
         val gameMoveValidators: MutableList<Validator> = chessGameValidators(ArrayList<Validator>())
         val checkMateValidators = chessCheckMateValidators(ArrayList<endGameValidator>())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        val chessMovementExecutioner = ChessMovementExecutioner(listOf(ChessPawnPromotion()))
+        val chessMovementExecutioner = ChessMovementExecutioner(emptyList())
         pieceRules[Piece(ChessPieceName.KING, PieceColor.WHITE, 13)] = chessKingRule()
         pieceRules[Piece(ChessPieceName.KING, PieceColor.BLACK, 29)] = chessKingRule()
         pieceRules[Piece(ChessPieceName.QUEEN, PieceColor.WHITE, 12)] = queenRule()
@@ -303,12 +300,12 @@ class Adapter : GameEngine {
     }
 
     fun createClassicCheckersGame():Game{
-        val gameBoard: MutableMap<Coordinate?, Piece?> = HashMap()
+        val gameBoard: MutableMap<Coordinate, Piece?> = HashMap()
         val board: Board = Board(gameBoard, 8, 8)
         val gameMoveValidators: MutableList<Validator> = checkersGameValidators(ArrayList())
         val endGameValidators = checkersEndGameValidators(ArrayList())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        val checkersExecutioner = CheckersMovementExecutioner(listOf(EatingMovement(), CheckersPawnPromotion()))
+        val checkersExecutioner = CheckersMovementExecutioner(emptyList())
         val checkersManager = CheckersTurnManager(-1)
         for (i in 1..12) {
             pieceRules[Piece(CheckersPieceName.PAWN, PieceColor.WHITE, i)] = checkersPawnsRule(PieceColor.WHITE)

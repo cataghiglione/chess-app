@@ -11,17 +11,16 @@ class OrientationValidator(orientation: Boolean) : Validator {
     private val northOrientation: Boolean = orientation
 
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
-        if (northOrientation){
-            return if (movement.getTo().yCoordinate > movement.getFrom().yCoordinate){
-                ValidMovementResult()
-            }
-            else return InvalidMovementResult("Invalid movement")
+        val isMovementValid = if (northOrientation) {
+            movement.getTo().row > movement.getFrom().row
+        } else {
+            movement.getFrom().row > movement.getTo().row
         }
-        else{
-            return if (movement.getFrom().yCoordinate > movement.getTo().yCoordinate){
-                ValidMovementResult()
-            }
-            else return InvalidMovementResult("Invalid movement")
+
+        return if (isMovementValid) {
+            ValidMovementResult()
+        } else {
+            InvalidMovementResult("Invalid movement")
         }
     }
 }

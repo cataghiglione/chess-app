@@ -21,7 +21,7 @@ class GameUi : Application() {
     }
 
     override fun start(primaryStage: Stage) {
-        primaryStage.title = CheckersTitle
+        primaryStage.title = ChessTitle
 
         val root = GameView(imageResolver)
         primaryStage.scene = Scene(root)

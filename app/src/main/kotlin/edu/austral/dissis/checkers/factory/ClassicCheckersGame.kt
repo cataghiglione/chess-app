@@ -1,48 +1,75 @@
 package edu.austral.dissis.checkers.factory
 
 import edu.austral.dissis.checkers.CheckersMovementExecutioner
-import edu.austral.dissis.checkers.CheckersTurnManager
-import edu.austral.dissis.checkers.endGameValidators.NoPiecesLeftValidator
-import edu.austral.dissis.checkers.endGameValidators.NoPossibleMovementsValidator
+import edu.austral.dissis.checkers.actionValidators.IsCheckersPawnValidator
+import edu.austral.dissis.checkers.actions.CheckersEatingAction
+import edu.austral.dissis.checkers.actions.CheckersNormalPromotionAction
+import edu.austral.dissis.checkers.actions.CheckersPromotionAndEatingAction
+import edu.austral.dissis.checkers.turnManagers.CheckersTurnManager
+import edu.austral.dissis.common.endGames.NoPiecesLeftValidator
 import edu.austral.dissis.checkers.entities.CheckersPieceName
-import edu.austral.dissis.checkers.specialMovements.CheckersPawnPromotion
-import edu.austral.dissis.checkers.specialMovements.EatingMovement
 import edu.austral.dissis.checkers.validators.CanEatValidator
 import edu.austral.dissis.checkers.validators.MustEatPieceValidator
 import edu.austral.dissis.chess.quantityValidators.LimitedQuantityMoveValidator
+import edu.austral.dissis.common.actionValidators.IsAtTheEndOfTheBoardValidator
+import edu.austral.dissis.common.actions.NormalMoveAction
 import edu.austral.dissis.common.entities.*
+import edu.austral.dissis.common.interfaces.Action
 import edu.austral.dissis.common.interfaces.Validator
 import edu.austral.dissis.common.interfaces.endGameValidator
 import edu.austral.dissis.common.validators.*
+import edu.austral.dissis.utils.and
+import edu.austral.dissis.utils.or
 
 class ClassicCheckersGame {
+
+    fun checkersPawnPromotionValidator() : Validator{
+        return or(
+            and(
+                IsCheckersPawnValidator(),
+                IsAtTheEndOfTheBoardValidator()
+            )
+        )
+    }
+    fun checkersPromotionAndEatingValidator() : Validator{
+        return or(
+            and(
+                IsCheckersPawnValidator(),
+                IsAtTheEndOfTheBoardValidator(),
+                CanEatValidator()
+            )
+        )
+    }
     fun checkersPawnsRule(color: PieceColor): Validator {
-        val orValidator= OrValidator(
+        val noEatingMovement = AndValidator(listOf(
+        LimitedQuantityMoveValidator(1),
+        DiagonalMovementMoveValidator(),
+        EmptySquareOnToValidator(),
+        MustEatPieceValidator(),
+        if (color == PieceColor.WHITE) {
+            OrientationValidator(true)
+        } else {
+            OrientationValidator(false)
+        }
+        ))
+
+        val eatingMovement = AndValidator(listOf(
+            LimitedQuantityMoveValidator(2),
+            DiagonalMovementMoveValidator(),
+            EmptySquareOnToValidator(),
+            MustEatPieceValidator(),
+            CanEatValidator(),
+            if (color == PieceColor.WHITE) {
+                OrientationValidator(true)
+            } else {
+                OrientationValidator(false)
+            }
+        )
+        )
+        val orValidator = OrValidator(
             listOf(
-                AndValidator(listOf(
-                    LimitedQuantityMoveValidator(1),
-                    DiagonalMovementMoveValidator(),
-                    EmptySquareOnToValidator(),
-                    MustEatPieceValidator(),
-                    if (color == PieceColor.WHITE) {
-                        OrientationValidator(true)
-                    } else {
-                        OrientationValidator(false)
-                    }
-                )),
-                AndValidator(listOf(
-                    LimitedQuantityMoveValidator(2),
-                    DiagonalMovementMoveValidator(),
-                    EmptySquareOnToValidator(),
-                    MustEatPieceValidator(),
-                    CanEatValidator(),
-                    if (color == PieceColor.WHITE) {
-                        OrientationValidator(true)
-                    } else {
-                        OrientationValidator(false)
-                    }
-                )
-                )
+                noEatingMovement,
+                eatingMovement
             )
         )
         return orValidator
@@ -63,10 +90,8 @@ class ClassicCheckersGame {
 
     }
     fun checkersEndGameValidators(endGameValidators: ArrayList<endGameValidator>):ArrayList<endGameValidator>{
-        val noPossibleMovementsValidator = NoPossibleMovementsValidator()
         val noPiecesLeftValidator = NoPiecesLeftValidator()
         endGameValidators.add(noPiecesLeftValidator)
-        endGameValidators.add(noPossibleMovementsValidator)
         return endGameValidators
     }
     fun checkersKingRule(): Validator {
@@ -93,12 +118,11 @@ class ClassicCheckersGame {
         )
     }
     fun createClassicCheckersGame(): Game {
-        val gameBoard: MutableMap<Coordinate?, Piece?> = HashMap()
+        val gameBoard: MutableMap<Coordinate, Piece?> = HashMap()
         val board: Board = Board(gameBoard, 8, 8)
         val gameMoveValidators: MutableList<Validator> = checkersGameValidators(ArrayList())
         val endGameValidators = checkersEndGameValidators(ArrayList())
         val pieceRules: MutableMap<Piece, Validator> = HashMap()
-        val checkersExecutioner = CheckersMovementExecutioner(listOf(EatingMovement(), CheckersPawnPromotion()))
         val checkersManager = CheckersTurnManager(-1)
         for (i in 1..12) {
             pieceRules[Piece(CheckersPieceName.PAWN, PieceColor.WHITE, i)] = checkersPawnsRule(PieceColor.WHITE)
@@ -138,7 +162,21 @@ class ClassicCheckersGame {
         gameBoard[Coordinate(6,3)]= Piece(CheckersPieceName.PAWN,PieceColor.WHITE,11)
         gameBoard[Coordinate(8,3)]= Piece(CheckersPieceName.PAWN,PieceColor.WHITE,12)
 
+        val actions = uploadActions(ArrayList())
+        val checkersExecutioner = CheckersMovementExecutioner(actions)
         val game = Game(board, ArrayList<Board>(),gameMoveValidators,pieceRules,PieceColor.WHITE,endGameValidators,checkersExecutioner,checkersManager)
         return game
+    }
+    private fun uploadActions(actions: MutableList<Action>):List<Action>{
+        val checkersPromotionAndEatingAction = CheckersPromotionAndEatingAction(checkersPromotionAndEatingValidator())
+        val checkersPawnPromotionAction = CheckersNormalPromotionAction(checkersPawnPromotionValidator())
+        val checkersEatingAction = CheckersEatingAction(CanEatValidator())
+
+        actions.add(checkersPromotionAndEatingAction)
+        actions.add(checkersPawnPromotionAction)
+        actions.add(checkersEatingAction)
+        actions.add(NormalMoveAction())
+        return actions
+
     }
 }

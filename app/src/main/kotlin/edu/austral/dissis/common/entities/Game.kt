@@ -8,6 +8,7 @@ import edu.austral.dissis.common.movementResults.InvalidMovementResult
 import edu.austral.dissis.common.movementResults.ValidMovementResult
 
 
+
 class Game(
     private val board: Board,
     private val movements: List<Board>,
@@ -16,7 +17,7 @@ class Game(
     private var currentPlayer: PieceColor = PieceColor.WHITE,
     private val endGameValidators: List<endGameValidator>,
     private val movementExecutioner: MovementExecutioner,
-    private val turnManager: TurnManager
+    private val turnManager: TurnManager,
 ) {
     private val gameValidators: List<Validator> = moveValidators
 
@@ -104,6 +105,7 @@ class Game(
     fun getTurnManager():TurnManager{
         return this.turnManager
     }
+
     public fun copy(board: Board = this.board, movements: List<Board> = this.movements,
                     moveValidators: List<Validator> = this.gameValidators, rules: Map<Piece,
                 Validator> = this.rules, currentPlayer: PieceColor = this.currentPlayer,

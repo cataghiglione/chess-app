@@ -10,10 +10,10 @@ import kotlin.math.abs
 
 class VerticalMovementMoveValidator : Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
-        val fromXCoordinate = movement.getFrom().xCoordinate;
-        val fromYCoordinate = movement.getFrom().yCoordinate;
-        val toXCoordinate = movement.getTo().xCoordinate;
-        val toYCoordinate = movement.getTo().yCoordinate;
+        val fromXCoordinate = movement.getFrom().column;
+        val fromYCoordinate = movement.getFrom().row;
+        val toXCoordinate = movement.getTo().column;
+        val toYCoordinate = movement.getTo().row;
         val xDistance = abs(fromXCoordinate - toXCoordinate)
         val yDistance = abs(fromYCoordinate - toYCoordinate)
         return if(xDistance == 0 && yDistance != 0){

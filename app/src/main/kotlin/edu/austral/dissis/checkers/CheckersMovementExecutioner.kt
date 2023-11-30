@@ -2,27 +2,42 @@ package edu.austral.dissis.checkers
 
 import edu.austral.dissis.common.entities.Game
 import edu.austral.dissis.common.entities.Movement
+import edu.austral.dissis.common.interfaces.Action
+import edu.austral.dissis.common.interfaces.ActionResult
 import edu.austral.dissis.common.interfaces.MovementExecutioner
 import edu.austral.dissis.common.interfaces.SpecialMovement
 
-class CheckersMovementExecutioner(private val specialMovements : List<SpecialMovement>): MovementExecutioner {
+class CheckersMovementExecutioner(private val actions: List<Action>) : MovementExecutioner {
 
     override fun getNewGame(movement: Movement, game: Game): Game {
-        var newGame  = game
-        var isSpecialMovement = false
-        for (specialMovement in specialMovements){
-            if (specialMovement.isSpecialMovement(movement,newGame)){
-                isSpecialMovement=true
-                newGame = specialMovement.getNewGame(movement,newGame)
+        val actionResult = lookupSuitableMovement(movement, game)
+        return actionResult?.getGameResult() ?: normalMovementGetNewGame(game, movement)
+//        return action?.executeAction(movement, game) ?: normalMovementGetNewGame(game, movement)
+
+    }
+
+    private fun lookupSuitableMovement(
+        movement: Movement,
+        game: Game
+    ): ActionResult? {
+        for ( action in actions){
+            val actionResult = action.executeAction(movement, game)
+            if (actionResult.wasActionPerformed()){
+                return actionResult
             }
         }
-        if (!isSpecialMovement){
-            val newBoards = game.getMovements().toList() + game.getBoard()
-            return newGame.copy(board = newGame.getBoard().move(movement), movements = newBoards, currentPlayer = newGame.getTurnManager().getNewTurn(newGame,movement))
-        }
-        return newGame
+        return null
+    }
 
-//        return Game(game.getBoard().move(movement),newBoards,game.getValidators(),game.getRules(),game.getTurnManager().getNewTurn(game,movement),game
-//            .getCheckMateValidators(),game.getMovementExecutioner(),game.getTurnManager() )
+    private fun normalMovementGetNewGame(
+        game: Game,
+        movement: Movement
+    ): Game {
+        val newBoards = game.getMovements().toList() + game.getBoard()
+        return game.copy(
+            board = game.getBoard().move(movement),
+            movements = newBoards,
+            currentPlayer = game.getTurnManager().getNewTurn(game, movement)
+        )
     }
 }

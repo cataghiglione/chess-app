@@ -12,8 +12,8 @@ class CanEatValidator: Validator {
     override fun validateMovement(movement: Movement, game: Game): MovementResult {
         val from = movement.getFrom()
         val to = movement.getTo()
-        val xCoordinate = (from.xCoordinate + to.xCoordinate)/2
-        val yCoordinate = (from.yCoordinate + to.yCoordinate)/2
+        val xCoordinate = (from.column + to.column)/2
+        val yCoordinate = (from.row + to.row)/2
         val squareContent = game.getBoard().getSquareContent(Coordinate(xCoordinate,yCoordinate))
         if (squareContent!=null ){
             return if (squareContent.getColor() == game.getCurrentPlayer()){
